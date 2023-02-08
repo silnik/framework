@@ -1,21 +1,25 @@
 <?php
 
-namespace Silnik\Kernel;
+declare(strict_types=1);
+
+namespace Silnik\Foundation;
 
 use Silnik\Sessions\Sessions;
 use Silnik\Cache\Cache;
 use Silnik\Uri\Uri;
 use Silnik\Http\Http;
 use Silnik\Logs\{ErrorPhp,LogLoad};
-use Dotenv\Dotenv;
+use Silnik\Dotenv\{Dotenv,DefaultEnv};
 
 class Kernel
 {
     private static $path = [];
     public $env = [];
-    public $method;
+    public $namespaceController;
+    public $methodController;
     public $http;
     public $uri;
+    public $alias = [];
 
     public function __construct()
     {
@@ -23,15 +27,16 @@ class Kernel
             define('PATH_ROOT', dirname(__FILE__, 1));
         }
         $this->varEnviroment();
-        $this->autoloadHelpers();
     }
 
     public function bootstrap()
     {
-        $appuri = $this->readEnv();
-        $this->httpRequestUri($appuri);
+        $this->uri = $this->UriRequest();
+        $this->http = $this->HttpRequest();
+
         $this->setDefines();
         $this->sessions();
+        $this->database();
         $this->logs();
         $this->cache();
         $this->mount();
@@ -39,62 +44,43 @@ class Kernel
     }
     public function terminal()
     {
-        $appuri = $this->readEnv();
         $this->setDefines();
     }
 
     private function setDefines()
     {
-        define('ROOT_UPLOAD', PATH_ROOT . self::$path['publicUploads']);
-        define('ROOT_TMP_UPLOAD', PATH_ROOT . self::$path['tmp']);
-        define('PATH_UPLOAD', str_replace('/public', '', self::$path['publicUploads']));
-        define('PRIVATE_UPLOAD', PATH_ROOT . self::$path['privateUploads']);
-        define('PATH_MIGRATIONS', PATH_ROOT . self::$path['migrations']);
-        define('PATH_CACHE', PATH_ROOT . self::$path['tmp'] . '/cache/');
-        define('PATH_SESS', PATH_ROOT . self::$path['sessions']);
-        define('SQL_LOG', PATH_ROOT . self::$path['log'] . '/sql_error.log');
-        define('PHP_LOG', PATH_ROOT . self::$path['log'] . '/php_error.log');
-        define('DEPLOY_LOG', PATH_ROOT . self::$path['log'] . '/deploy.log');
-    }
+        define('UPLOAD_PUBLIC', str_replace('/public', '', $_ENV['PATH_UPLOAD_PUBLIC']));
+        define('PATH_UPLOAD_PUBLIC', PATH_ROOT . $_ENV['PATH_UPLOAD_PUBLIC']);
+        define('PATH_UPLOAD_PRIVARTE', PATH_ROOT . $_ENV['PATH_UPLOAD_PRIVARTE']);
+        define('PATH_SESSIONS', PATH_ROOT . $_ENV['PATH_SESSIONS']);
+        define('PATH_TMP', PATH_ROOT . $_ENV['PATH_TMP']);
+        define('PATH_LOG', PATH_ROOT . $_ENV['PATH_LOG']);
+        define('PATH_MIGRATIONS', PATH_ROOT . $_ENV['PATH_MIGRATIONS']);
+        define('PATH_DATABASE', PATH_ROOT . $_ENV['PATH_DATABASE']);
+        define('PATH_CACHE', PATH_ROOT . $_ENV['PATH_CACHE']);
 
-    private function readEnv()
-    {
-        $dotenv = Dotenv::createUnsafeImmutable(PATH_ROOT);
-        $dotenv->load();
 
-        $appParseUrl = '';
-        if (isset($_SERVER['REQUEST_SCHEME']) && isset($_SERVER['SERVER_NAME'])) {
-            $parse_uri_request = parse_url($_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI']);
+        $makeDirectoryENV = [
+            PATH_UPLOAD_PUBLIC,
+            PATH_UPLOAD_PRIVARTE,
+            PATH_SESSIONS,
+            PATH_TMP,
+            PATH_LOG,
+            PATH_MIGRATIONS,
+            PATH_DATABASE,
+            PATH_CACHE,
+        ];
 
-            $apps = (explode('|', $_ENV['APPS']));
-            if (is_array($apps) && count($apps) > 0) {
-                foreach ($apps as $key => $value) {
-                    $uri = $_ENV['APP_URL_' . $value];
-                    $parse_uri_app = parse_url($uri);
-
-                    if ($parse_uri_request['host'] == $parse_uri_app['host']) {
-                        if ($parse_uri_app['path'] == substr($parse_uri_request['path'], 0, strlen($parse_uri_app['path']))) {
-                            $appName = $value;
-                            $appParseUrl = $parse_uri_app;
-                        }
-                    }
-                    putenv('APP_URL_' . $value . '=false');
-                    unset($_ENV['APP_URL_' . $value], $_SERVER['APP_URL_' . $value]);
-                }
+        foreach ($makeDirectoryENV as $dir) {
+            if (!is_dir($dir)) {
+                mkdir($dir, 0777);
             }
-            putenv('APPS=false');
-            unset($_ENV['APPS'], $_SERVER['APPS']);
-
-            putenv('APP_NAME=' . $appName);
-            $_SERVER['APP_NAME'] = $_ENV['APP_NAME'] = $appName;
         }
-
-        return $appParseUrl;
     }
 
     private function sessions()
     {
-        return (new Sessions(PATH_SESS))->start();
+        return (new Sessions($path = PATH_SESSIONS))->start();
     }
     private function logs()
     {
@@ -106,15 +92,41 @@ class Kernel
     }
     private function varEnviroment()
     {
-        $this->env = require_once '../env.default.php';
-        //\ORM::startEntityManager();
+        (new Dotenv())->mergeEnv(
+            (new DefaultEnv())->getData()
+        )->load(PATH_ROOT)->build();
+    }
+    private function database()
+    {
+        if (
+            class_exists('\Silnik\ORM\EntityManagerFactory') &&
+            isset($_ENV['DB_USERNAME']) && !empty($_ENV['DB_USERNAME']) &&
+            isset($_ENV['DB_PASSWORD']) && !empty($_ENV['DB_PASSWORD']) &&
+            isset($_ENV['DB_DATABASE']) && !empty($_ENV['DB_DATABASE'])
+
+        ) {
+            \Silnik\ORM\ORM::startEntityManager();
+        }
     }
 
-    private function httpRequestUri($appParseUrl)
+    /**
+     * Summary of UriRequest
+     * @return Uri
+     */
+    private function UriRequest()
     {
-        $this->uri = Uri::getInstance($appParseUrl);
-        $this->http = Http::getInstance();
+        return Uri::getInstance();
     }
+
+    /**
+     * Summary of HttpRequest
+     * @return Http
+     */
+    private function HttpRequest()
+    {
+        return Http::getInstance();
+    }
+
     private function mount()
     {
         // path
@@ -142,41 +154,23 @@ class Kernel
                     $ext = $arrayURI[2];
                 }
             } else {
-                if (
-                    (mb_strpos($this->uri->getFulluri(), '/api/') || mb_strpos($this->uri->getFulluri(), 'api.'))
-                ) {
-                    $controller = new ApiController();
+                $router = new \Silnik\Router\Router();
+                $router->registerRoutesFromControllerAttributes(require_once PATH_ROOT . '/config/routes.php');
+                $namespace = $router->resolve($this->uri->getUri(), $this->http->method());
+                if (!is_null($namespace)) {
+                    $LogLoad = (new LogLoad(['path' => PATH_LOG, 'limit' => 5]));
+                    $LogLoad->register($namespace . ':' . $this->http->method());
                 } else {
-                    $controller = new WebController();
-                }
-                $namespace = $controller->getNamespace($this->uri->getSlices());
-                $controller->instance();
-                if (!empty($this->namespace)) {
-                    $LogLoad = (new LogLoad(['path' => PATH_ROOT . self::$path['tmp'], 'limit' => 5]))->register($this->namespace . ':' . $this->method);
+                    $controller = new \Controller\NotFound();
+                    if ($_SERVER['TYPE_RESPONSE'] == 'JSON') {
+                        $controller->showJson();
+                    } else {
+                        $controller->showHtml();
+                    }
                 }
             }
         }
     }
-
-    private function autoloadHelpers()
-    {
-        spl_autoload_register(function ($class) {
-            $classFileLibrary = PATH_ROOT . '/library/custom/helpers/' . $class . '.php';
-            $classFileFramework = __DIR__ . '/helpers/' . $class . '.php';
-
-            if (file_exists($classFileLibrary) && is_file($classFileLibrary)) {
-                require_once $classFileLibrary;
-            } elseif (file_exists($classFileFramework) && is_file($classFileFramework)) {
-                require_once $classFileFramework;
-            } elseif (substr(str_replace('\\', '', $class), 0, 6) != 'Models') {
-                ErrosLogs::dump("{$class}.php not found", 'error');
-                if (getenv('TYPE_APP') != 'API' && PHP_SAPI !== 'cli') {
-                    new \Core\PrintCodeError(503);
-                }
-            }
-        });
-    }
-
     public static function createDirectories()
     {
         $d = DIRECTORY_SEPARATOR;
@@ -215,7 +209,8 @@ class Kernel
         }
     }
 
-    public static function startEnv(\Composer\Script\Event $event)
+    //public static function startEnv(\Composer\Script\Event $event)
+    public static function startEnv($event)
     {
         $dir = new \DirectoryIterator(dirname(__FILE__, 4));
         foreach ($dir as $fileinfo) {
@@ -247,9 +242,9 @@ class Kernel
     }
     public static function afterDeploy()
     {
-        $hash = substr(md5(time()), 0, 7);
+        $hash = substr(md5((string)time()), 0, 7);
         file_put_contents(
-            DEPLOY_LOG,
+            PATH_LOG . '/deploy.log',
             json_encode(['hash' => $hash,
                 'generatedTime' => date('Y-m-d H:i:s'),
             ], JSON_PRETTY_PRINT)

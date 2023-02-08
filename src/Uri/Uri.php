@@ -12,25 +12,38 @@ class Uri
     private $baseAppUrl;
     private $baseHref;
 
-    private function __construct($parseUrl)
+    private function __construct()
     {
-        $this->https = ($parseUrl['scheme'] == 'https');
-        $this->baseAppUrl = ($parseUrl['path'] != '/' ? '/' . $parseUrl['path'] : '');
-        $this->hostname = $parseUrl['host'];
-        $this->slices = explode('/', preg_replace('/^[\/]*(.*?)[\/]*$/', '\\1', getenv('REQUEST_URI')));
+        $uriApp = parse_url($_ENV['APP_URL']);
+
+        $this->https = ($uriApp['scheme'] == 'https');
+        $this->hostname = $uriApp['host'];
+        $this->baseAppUrl = ($uriApp['path'] != '/' ? $uriApp['path'] : '');
+
+        $this->slices = explode('/', preg_replace('/^[\/]*(.*?)[\/]*$/', '\\1', str_replace($this->baseAppUrl, '', getenv('REQUEST_URI'))));
         $this->baseHref = ($this->https ? 'https://' : 'http://') . $this->hostname . $this->baseAppUrl;
         $this->fullUri = ($this->https ? 'https://' : 'http://') . $this->hostname . getenv('REQUEST_URI');
 
         $_SERVER['APP_URL'] = $_ENV['APP_URL'] = $this->baseHref;
         putenv('APP_URL=' . $this->baseHref);
 
+
+        if ($_SERVER['REQUEST_METHOD'] != 'GET' ||
+            mb_strpos($this->getUri(), 'api.') !== false ||
+            mb_strpos($this->getUri(), '/api/') !== false
+        ) {
+            putenv('TYPE_RESPONSE=JSON');
+        } else {
+            putenv('TYPE_RESPONSE=HTML');
+        }
+        $_SERVER['TYPE_RESPONSE'] = $_ENV['TYPE_RESPONSE'] = getenv('TYPE_RESPONSE');
         $this->forceLocations();
     }
 
     public static function getInstance($params = [])
     {
         if (is_null(self::$instance)) {
-            self::$instance = new self($params);
+            self::$instance = new self();
         }
 
         return self::$instance;
@@ -49,10 +62,10 @@ class Uri
         }
     }
 
-    public function nextSlice($ref = '', $removeGets = true)
+    public function nextSlice($ref = '', $uri = null, $removeGets = true)
     {
         if ($removeGets == true) {
-            $this->slices = explode('/', explode('?', getenv('REQUEST_URI'))[0]);
+            $this->slices = explode('/', explode('?', (is_null($uri) ? getenv('REQUEST_URI') : $uri))[0]);
         }
         if (in_array($ref, $this->slices)) {
             $pointer = reset($this->slices);
@@ -60,6 +73,24 @@ class Uri
                 $pointer = next($this->slices);
             } while ($pointer != $ref);
             $pointer = next($this->slices);
+
+            return $pointer;
+        } else {
+            return false;
+        }
+    }
+
+    public function prevSlice($ref = '', $uri = null, $removeGets = true)
+    {
+        if ($removeGets == true) {
+            $slices = explode('/', $uri);
+        }
+        if (in_array($ref, $slices)) {
+            $pointer = reset($slices);
+            do {
+                $pointer = next($slices);
+            } while ($pointer != $ref);
+            $pointer = prev($slices);
 
             return $pointer;
         } else {

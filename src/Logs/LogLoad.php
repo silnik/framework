@@ -12,6 +12,11 @@
             $this->limitRegister = $conf['limit'];
         }
 
+        /**
+         * Summary of register
+         * @param mixed $page
+         * @return never
+         */
         public function register($page = '')
         {
             if (defined('MICROTIME') == true) {
@@ -58,5 +63,6 @@
                     fclose($f);
                 }
             }
+            exit;
         }
     }

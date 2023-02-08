@@ -14,12 +14,22 @@ class Cache
         header('Pragma: no-cache');
     }
 
-    public function clearPath($dir)
+    /**
+     * Summary of clearPath
+     * @param string $dir
+     * @return void
+     */
+    public function clearPath(string $dir)
     {
         $this->rrmdir($dir);
     }
 
-    private function rrmdir($src)
+    /**
+     * Summary of rrmdir
+     * @param string $src
+     * @return void
+     */
+    private function rrmdir(string $src)
     {
         if (file_exists($src)) {
             $dir = opendir($src);

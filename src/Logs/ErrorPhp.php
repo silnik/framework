@@ -1,6 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Silnik\Logs;
+
+use Whoops\Run;
+use Whoops\Handler\CallbackHandler;
+use Whoops\Handler\PrettyPageHandler;
+
+use Datetime;
 
 class ErrorPhp
 {
@@ -12,23 +20,23 @@ class ErrorPhp
             ini_set('display_errors', 1);
             ini_set('ignore_repeated_errors', true);
             ini_set('display_startup_errors', 1);
-            ini_set('error_log', PHP_LOG);
+            ini_set('error_log', PATH_LOG . '/php-error.log');
             ini_set('error_reporting', E_ALL);
         } else {
             ini_set('log_errors', 0);
             ini_set('display_errors', 0);
             ini_set('display_startup_errors', 0);
-            ini_set('error_log', PHP_LOG);
+            ini_set('error_log', PATH_LOG . '/php-error.log');
             ini_set('error_reporting', E_ALL);
         }
-        if (getenv('APP_ENV') != 'production') {
-            $whoops = new \Whoops\Run;
-            $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler)->register();
+        if (getenv('APP_ENV') != 'production' && getenv('TYPE_REQUEST') == 'WEB') {
+            $whoops = new Run;
+            $whoops->pushHandler(new PrettyPageHandler)->register();
         } else {
-            $whoops = new \Whoops\Run;
-            $whoops->pushHandler(new \Whoops\Handler\CallbackHandler(function ($error) {
+            $whoops = new Run;
+            $whoops->pushHandler(new CallbackHandler(function ($error) {
                 file_put_contents(
-                    PHP_LOG,
+                    PATH_LOG . '/php-error.log',
                     date('Y-m-d H:i:s') . ': ' . $error->getMessage() . ' File: ' . $error->getFile() . ' Line: ' . $error->getLine() . PHP_EOL,
                     FILE_APPEND | LOCK_EX
                 );
@@ -47,7 +55,7 @@ class ErrorPhp
     mylog ('next', 'd') -> DEBUG
     mylog ('next', 'd', 'debug.log') -> DEBUG file debug.log
     */
-    public static function dump($text, $level = 'i', $dir = '')
+    public static function dumpError($text, $level = 'i', $dir = '')
     {
         switch (strtolower($level)) {
             case 'e':
@@ -72,6 +80,6 @@ class ErrorPhp
 
         $timezone = date_default_timezone_get();
         $tag = '[' . $d->format(($timezone == 'America/Sao_Paulo' ? 'd-M-Y H:i:s' : 'Y-m-d H:i:s')) . ' ' . $timezone . '] ' . $level;
-        error_log($tag . ":\t" . $text . "\n", 3, PHP_LOG);
+        error_log($tag . ":\t" . $text . "\n", 3, ini_get('error_log'));
     }
 }

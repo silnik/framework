@@ -34,7 +34,7 @@ class Http
 
         return self::$instance;
     }
-    public function getHeader($k)
+    public function header($k)
     {
         if (isset($this->headers[$k])) {
             return $this->headers[$k];
@@ -42,7 +42,7 @@ class Http
             return $this->headers;
         }
     }
-    public function getMethod()
+    public function method()
     {
         return $this->method;
     }

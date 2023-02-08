@@ -4,13 +4,11 @@ namespace Silnik\Sessions;
 
 class Sessions
 {
-    private $path = '';
-    private $expiteFullSessDays = 30;
-    private $expiteEmptySessDays = 1;
-
-    public function __construct($PATH_SESS)
-    {
-        $this->path = $PATH_SESS;
+    public function __construct(
+        private $path = '',
+        private $expiteFullSessDays = 30,
+        private $expiteEmptySessDays = 1
+    ) {
     }
     public function start()
     {

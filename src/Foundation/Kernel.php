@@ -26,8 +26,8 @@ class Kernel
         if (!defined('PATH_ROOT')) {
             define('PATH_ROOT', dirname(__FILE__, ($type == 'terminal') ? 6 : 1));
         }
-        $this->varEnviroment();
-        $this->setDefines();
+        self::varEnviroment();
+        self::setDefines();
     }
 
     public function bootstrap()
@@ -43,7 +43,7 @@ class Kernel
         define('DEPLOY_HASH', $this->getHashDeploy());
     }
 
-    private function setDefines()
+    private static function setDefines()
     {
         define('UPLOAD_PUBLIC', str_replace('/public', '', $_ENV['PATH_UPLOAD_PUBLIC']));
         define('PATH_UPLOAD_PUBLIC', PATH_ROOT . $_ENV['PATH_UPLOAD_PUBLIC']);
@@ -86,7 +86,7 @@ class Kernel
     {
         return new Cache();
     }
-    private function varEnviroment()
+    private static function varEnviroment()
     {
         (new Dotenv())->mergeEnv(
             (new DefaultEnv())->getData()
@@ -149,27 +149,6 @@ class Kernel
             }
         }
     }
-    public static function createDirectories()
-    {
-        $d = DIRECTORY_SEPARATOR;
-        $root = explode($d, __DIR__);
-        array_pop($root);
-        array_pop($root);
-        array_pop($root);
-        $root = implode($d, $root);
-
-        foreach (self::$path as $key => $value) {
-            $dir = $root . (implode($d, explode('/', $value)));
-            if (!file_exists($dir)) {
-                mkdir($dir, 0755, true);
-                file_put_contents($dir . $d . '.ignore', '/');
-            }
-        }
-        file_put_contents(
-            dirname(__FILE__, 4) . self::$path['log'] . '/deploy.log',
-            ''
-        );
-    }
     public static function getHashDeploy()
     {
         if (file_exists(dirname(__FILE__, 4) . self::$path['log'] . '/deploy.log')) {
@@ -187,39 +166,18 @@ class Kernel
         }
     }
 
-    //public static function startEnv(\Composer\Script\Event $event)
-    public static function startEnv($event)
-    {
-        $dir = new \DirectoryIterator(dirname(__FILE__, 4));
-        foreach ($dir as $fileinfo) {
-            if ($fileinfo->isFile()) {
-                if (substr($fileinfo->getBasename(), 0, 4) == '.env') {
-                    if ($event->getArguments()[0] == substr($fileinfo->getBasename(), 5)) {
-                        rename($fileinfo->getBasename(), '_.env');
-                    } else {
-                        unlink($fileinfo->getBasename());
-                    }
-                }
-            }
-        }
-        rename('_.env', '.env');
-    }
-    public static function clearStorageSess()
-    {
-        date_default_timezone_set('America/Sao_Paulo');
-        (new Sessions(
-            dirname(__FILE__, 4) . self::$path['sessions']
-        )
-        )->clearEmptySessions();
-    }
-    public static function clearStorageCache()
-    {
-        (new Cache())->clearPath(
-            self::$path['tmp'] . '/cache/'
-        );
-    }
     public static function afterDeploy()
     {
+        if (!defined('PATH_ROOT')) {
+            define('PATH_ROOT', dirname(__FILE__, 6));
+        }
+        self::varEnviroment();
+        self::setDefines();
+
+        Cache::clearPath(PATH_CACHE);
+        Cache::clearPath(PATH_TMP);
+
+
         $hash = substr(md5((string)time()), 0, 7);
         file_put_contents(
             PATH_LOG . '/deploy.log',

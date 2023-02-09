@@ -19,9 +19,9 @@ class Cache
      * @param string $dir
      * @return void
      */
-    public function clearPath(string $dir)
+    public static function clearPath(string $dir)
     {
-        $this->rrmdir($dir);
+        self::rrmdir($dir);
     }
 
     /**
@@ -29,15 +29,15 @@ class Cache
      * @param string $src
      * @return void
      */
-    private function rrmdir(string $src)
+    private static function rrmdir(string $src)
     {
         if (file_exists($src)) {
             $dir = opendir($src);
             while (false !== ($file = readdir($dir))) {
-                if ($file != '.' && $file != '..' && $file != '.ignore') {
+                if ($file != '.' && $file != '..') {
                     $full = $src . '/' . $file;
                     if (is_dir($full)) {
-                        $this->rrmdir($full);
+                        self::rrmdir($full);
                         rmdir($full);
                     } else {
                         unlink($full);

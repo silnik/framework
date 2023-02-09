@@ -28,7 +28,7 @@ class Uri
         putenv('APP_URL=' . $this->baseHref);
 
 
-        if ($_SERVER['REQUEST_METHOD'] != 'GET' ||
+        if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] != 'GET' ||
             mb_strpos($this->getUri(), 'api.') !== false ||
             mb_strpos($this->getUri(), '/api/') !== false
         ) {

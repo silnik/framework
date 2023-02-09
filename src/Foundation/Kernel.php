@@ -21,30 +21,26 @@ class Kernel
     public $uri;
     public $alias = [];
 
-    public function __construct()
+    public function __construct(string $type = 'web')
     {
         if (!defined('PATH_ROOT')) {
-            define('PATH_ROOT', dirname(__FILE__, 1));
+            define('PATH_ROOT', dirname(__FILE__, ($type == 'terminal') ? 6 : 1));
         }
         $this->varEnviroment();
+        $this->setDefines();
     }
 
     public function bootstrap()
     {
-        $this->uri = $this->UriRequest();
-        $this->http = $this->HttpRequest();
+        $this->uri = Uri::getInstance();
+        $this->http = Http::getInstance();
 
-        $this->setDefines();
         $this->sessions();
         $this->database();
         $this->logs();
         $this->cache();
         $this->mount();
         define('DEPLOY_HASH', $this->getHashDeploy());
-    }
-    public function terminal()
-    {
-        $this->setDefines();
     }
 
     private function setDefines()
@@ -107,24 +103,6 @@ class Kernel
         ) {
             \Silnik\ORM\ORM::startEntityManager();
         }
-    }
-
-    /**
-     * Summary of UriRequest
-     * @return Uri
-     */
-    private function UriRequest()
-    {
-        return Uri::getInstance();
-    }
-
-    /**
-     * Summary of HttpRequest
-     * @return Http
-     */
-    private function HttpRequest()
-    {
-        return Http::getInstance();
     }
 
     private function mount()

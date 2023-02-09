@@ -55,31 +55,25 @@ class ErrorPhp
     mylog ('next', 'd') -> DEBUG
     mylog ('next', 'd', 'debug.log') -> DEBUG file debug.log
     */
-    public static function dumpError($text, $level = 'i', $dir = '')
+    public static function registerError($message, $level = 'INFO', $file = '', $debug = null)
     {
-        switch (strtolower($level)) {
-            case 'e':
-            case 'error':
-                $level = 'ERROR';
+        $level = match (strtolower($level)) {
+            'error' => 'ERROR',
+            'info' => 'INFO',
+            'debug' => 'DEBUG',
+            'orm' => 'ORM',
+            default => 'NOT DEFINED'
+        };
 
-                break;
-            case 'i':
-            case 'info':
-                $level = 'INFO';
-
-                break;
-            case 'd':
-            case 'debug':
-                $level = 'DEBUG';
-
-                break;
-            default:
-                $level = 'INFO';
+        if ($level == 'ORM') {
+            $file = 'sql-error.log';
         }
-        $d = new DateTime();
+        if (!is_null($debug)) {
+            $message = $debug[0]['file'] . ' : ' . $debug[0]['line'] . ' on ' . $debug[0]['function'] . ' : ' . $message;
+        }
 
         $timezone = date_default_timezone_get();
-        $tag = '[' . $d->format(($timezone == 'America/Sao_Paulo' ? 'd-M-Y H:i:s' : 'Y-m-d H:i:s')) . ' ' . $timezone . '] ' . $level;
-        error_log($tag . ":\t" . $text . "\n", 3, ini_get('error_log'));
+        $tag = '[' . (new DateTime)->format(($timezone == 'America/Sao_Paulo' ? 'd-M-Y H:i:s' : 'Y-m-d H:i:s')) . ' ' . $timezone . '] ' . $level;
+        error_log('[' . $tag . '] ' . $message . "\n", 3, PATH_LOG . '/' . (!empty($file) ? $file : 'php-error.log'));
     }
 }

@@ -9,7 +9,7 @@ class Http
     private $get = [];
     private $body = [];
     private $params = null;
-    private $method = null;
+    private $method = 'GET';
 
     public function __construct()
     {
@@ -65,6 +65,35 @@ class Http
     public function isDELETE()
     {
         return ($this->method == 'DELETE');
+    }
+
+
+    /**
+     *
+     * @param string|array $params
+     * @param $forceType
+     * @return mixed
+     */
+    public function dataParams(string|array $params, $forceType = null, $required = false): mixed
+    {
+        $ret = null;
+        if (is_string($params)) {
+            $ret = $this->data($params);
+        } elseif (is_array($params)) {
+            $ret = $this->data($params);
+        }
+        if (is_null($ret)) {
+            throw new \Exception($params . ' is required', 400);
+        } else {
+            return match ($forceType) {
+                'int' => (int) $ret,
+                'string' => (string) $ret,
+                'bool' => (bool) $ret,
+                'float' => (float) $ret,
+                'array' => (array) $ret,
+                default => trim($ret)
+            };
+        }
     }
 
     public function getParamsREST($uriSplit = '')

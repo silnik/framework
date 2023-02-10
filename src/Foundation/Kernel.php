@@ -28,19 +28,18 @@ class Kernel
         }
         self::varEnviroment();
         self::setDefines();
+        define('DEPLOY_HASH', $this->getHashDeploy());
     }
 
     public function bootstrap()
     {
         $this->uri = Uri::getInstance();
         $this->http = Http::getInstance();
-
         $this->sessions();
         $this->database();
         $this->logs();
         $this->cache();
         $this->mount();
-        define('DEPLOY_HASH', $this->getHashDeploy());
     }
 
     private static function setDefines()
@@ -151,17 +150,10 @@ class Kernel
     }
     public static function getHashDeploy()
     {
-        if (file_exists(dirname(__FILE__, 4) . self::$path['log'] . '/deploy.log')) {
-            $deploylog = json_decode(file_get_contents(dirname(__FILE__, 4) . self::$path['log'] . '/deploy.log'), true);
+        if (file_exists(PATH_LOG . '/deploy.log')) {
+            $deploylog = json_decode(file_get_contents(PATH_LOG . '/deploy.log'), true);
             if (!is_null($deploylog) && is_array($deploylog) && isset($deploylog['hash']) && !empty($deploylog['hash'])) {
                 return $deploylog['hash'];
-            }
-        }
-
-        $runnigAfterDeploy = json_decode(file_get_contents(PATH_ROOT . '/composer.json'), true);
-        if (isset($runnigAfterDeploy['scripts']['after-deploy']) && $runnigAfterDeploy['scripts']['after-deploy']) {
-            foreach ($runnigAfterDeploy['scripts']['after-deploy'] as $key => $value) {
-                eval($value . '();');
             }
         }
     }

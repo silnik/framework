@@ -31,6 +31,11 @@ class Router
                 if ($call->isPublic() == true) {
                     $attributes = $method->getAttributes(Route::class, \ReflectionAttribute::IS_INSTANCEOF);
                     if (!empty($attributes)) {
+                        $comment = '';
+                        if ($call->getDocComment() != false) {
+                            $comment = preg_match_all("#([a-zA-Z]+\s*[a-zA-Z0-9, ()_].*)#", $call->getDocComment(), $matches, PREG_PATTERN_ORDER);
+                            $comment = $matches[0][0];
+                        }
                         foreach ($attributes as $attribute) {
                             $route = $attribute->getArguments();
                             $url = $route[0];
@@ -52,7 +57,7 @@ class Router
                             if (substr($url, -1) == '/') {
                                 $url = substr($url, 0, -1);
                             }
-                            $this->register($route['methods'], $url, ['uri' => $route[0], 'namespace' => $controller, 'method' => $method->getName(), 'params' => $params, 'typeResponse' => $typeResponse]);
+                            $this->register($route['methods'], $url, ['uri' => $route[0], 'namespace' => $controller, 'method' => $method->getName(), 'params' => $params, 'typeResponse' => $typeResponse, 'message' => $comment ? $typeResponse . ' ' . $comment : '']);
                         }
                     }
                 }

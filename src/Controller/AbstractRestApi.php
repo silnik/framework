@@ -121,7 +121,7 @@ abstract class AbstractRestApi
                 'POST' => 'Você não tem permissão para criar.',
                 'PUT','PATH' => 'Você não tem permissão para alterar.',
                 'DELETE' => 'Você não tenm permissão para remover.',
-                default => 'Você não tem permissão ',
+                default => 'Você não tem permissão',
             },
             404 => 'Rota não encontrada.',
             500 => 'Erro interno do servidor.',
@@ -144,7 +144,8 @@ abstract class AbstractRestApi
         header('Expires: ' . gmdate('D, d M Y H:i:s', time() + ($this->cacheExpiresMins * 60)) . ' GMT');
         http_response_code($this->code);
         echo json_encode($this->data, JSON_UNESCAPED_UNICODE);
-        exit;
+
+        $this->end(10);
     }
 
 
@@ -166,5 +167,9 @@ abstract class AbstractRestApi
             );
             $this->status(500)->response('message', 'Internal Server Error')->dumpJson();
         }
+    }
+    final public function end($recordsLoadPage = null)
+    {
+        (\Silnik\Logs\LogLoad::getInstance())->register($recordsLoadPage);
     }
 }

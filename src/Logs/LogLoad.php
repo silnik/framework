@@ -4,63 +4,106 @@
 
     class LogLoad
     {
-        public $filename = '/loadpage.log';
-        public $limitRegister;
-        public function __construct($conf = ['path' => '/tmp', 'limit' => '5'])
-        {
-            $this->filename = $conf['path'] . $this->filename;
-            $this->limitRegister = $conf['limit'];
+        private $recordsDefault = 10;
+        public static $instance = null;
+        public function __construct(
+            private string $filename = '',
+            private string $app = '',
+            private string $namespace = '',
+            private string $method = '',
+            private string $actionUri = '',
+        ) {
         }
 
         /**
-         * Summary of register
-         * @param mixed $page
-         * @return never
+         * Undocumented function
+         *
+         * @param [type] $filename
+         * @param [type] $namespace
+         * @param [type] $method
+         * @param string $methodHttp
+         * @param string $actionUri
+         * @return self
          */
-        public function register($page = '')
+        public static function setInstance(
+            $filename,
+            $namespace,
+            $method,
+            $methodHttp = '',
+            $actionUri = ''
+        ): self {
+            $methodHttp = empty($methodHttp) ? 'GET' : $methodHttp;
+            $actionUri = empty($actionUri) ? $_SERVER['REQUEST_URI'] : $actionUri;
+            $app = explode('\\', $namespace)[1];
+
+            self::$instance = new self(
+                $filename,
+                $app,
+                $namespace,
+                $method,
+                '[' . $methodHttp . ']' . $actionUri,
+            );
+
+            return self::$instance;
+        }
+
+        /**
+         *
+         * @return self
+         */
+        public static function getInstance(): self
         {
+            return self::$instance;
+        }
+
+        /**
+         *
+         * @param [type] $numRegisters
+         * @return void
+         */
+        public function register($records = null): void
+        {
+            if (is_null($records)) {
+                $records = $this->recordsDefault;
+            }
             if (defined('MICROTIME') == true) {
-                $timer = microtime(true) - MICROTIME;
-                if ($this->limitRegister != 0) {
-                    if (!file_exists($this->filename)) {
-                        file_put_contents($this->filename, '');
+                $milliseconds = (float)number_format((microtime(true) - MICROTIME) * 1000, 5);
+                if ($records > 0) {
+                    if (file_exists($this->filename)) {
+                        $register = json_decode(file_get_contents($this->filename), true);
+                    } else {
+                        $register = [];
                     }
-                    $text = '';
-                    $addLine = true;
-                    $f = fopen($this->filename, 'r+');
-                    while (!feof($f)) {
-                        //pega conteudo da linha
-                        $line = fgets($f);
-                        if ($line != '') {
-                            $lines = explode('|', $line);
-                            if (isset($lines[0]) && $lines[0] == $page) {
-                                //define que o arquivo será reescrito
-                                $addLine = false;
-                                $text = substr($text, 0, -1);
-                                $lines[1] = explode(';', $lines[1]);
-                                array_pop($lines[1]);
-                                $limitData = $this->limitRegister - 1;
-                                if (count($lines[1]) >= $limitData) {
-                                    while (count($lines[1]) > $limitData) {
-                                        array_shift($lines[1]);
-                                    }
-                                }
-                                if (strlen($text) != 0) {
-                                    $text .= "\n";
-                                }
-                                $text .= $page . '|' . implode(';', $lines[1]) . ';' . $timer . ';' . "\n";
-                            } else {
-                                $text .= $line;
+
+                    $memory = \Silnik\Utils\Server::getServerMemoryUsage();
+                    if ($this->app == 'NotFound') {
+                        $register[$this->app][$this->actionUri][] = ['milliseconds' => $milliseconds, 'memory_pct' => $memory['pct'], 'datetime' => date('Y-m-d H:i:s')];
+                        $max = 10;
+                        $count = count($register[$this->app]);
+                        if ($count > $max) {
+                            $remove = $count - $max;
+                            for ($i = 0;$i < $remove;$i++) {
+                                array_shift($register[$this->app]);
+                            }
+                        }
+                    } else {
+                        $register[$this->app][$this->namespace][$this->actionUri][$this->method][] = ['milliseconds' => $milliseconds, 'memory_pct' => $memory['pct'], 'datetime' => date('Y-m-d H:i:s')];
+
+                        $count = count($register[$this->app][$this->namespace][$this->actionUri][$this->method]);
+                        if ($count > $records) {
+                            $remove = $count - $records;
+                            for ($i = 0;$i < $remove;$i++) {
+                                array_shift(
+                                    $register[$this->app][$this->namespace][$this->actionUri][$this->method]
+                                );
                             }
                         }
                     }
-                    rewind($f);
-                    ftruncate($f, 0);
-                    if ($addLine == true) {
-                        $text .= $page . '|' . $timer . ';' . "\n";
-                    }
-                    fwrite($f, $text);
-                    fclose($f);
+
+                    file_put_contents(
+                        $this->filename,
+                        json_encode($register, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT)
+                    );
                 }
             }
             exit;

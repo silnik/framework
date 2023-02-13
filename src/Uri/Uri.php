@@ -21,7 +21,7 @@ class Uri
         $this->baseAppUrl = ($uriApp['path'] != '/' ? $uriApp['path'] : '');
 
         $this->slices = explode('/', preg_replace('/^[\/]*(.*?)[\/]*$/', '\\1', str_replace($this->baseAppUrl, '', getenv('REQUEST_URI'))));
-        $this->baseHref = ($this->https ? 'https://' : 'http://') . $this->hostname . $this->baseAppUrl;
+        $this->baseHref = ($this->https ? 'https://' : 'http://') . $this->hostname . $this->baseAppUrl . '/';
         $this->fullUri = ($this->https ? 'https://' : 'http://') . $this->hostname . getenv('REQUEST_URI');
 
         $_SERVER['APP_URL'] = $_ENV['APP_URL'] = $this->baseHref;
@@ -40,7 +40,7 @@ class Uri
         $this->forceLocations();
     }
 
-    public static function getInstance($params = [])
+    public static function getInstance()
     {
         if (is_null(self::$instance)) {
             self::$instance = new self();

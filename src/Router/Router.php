@@ -82,6 +82,7 @@ class Router
     public function resolve(string $requestUri, string $requestMethod)
     {
         $uri = Uri::getInstance();
+
         if (isset($this->routes[$requestMethod])) {
             foreach ($this->routes[$requestMethod] as $key => $value) {
                 if (mb_strpos($uri->getBaseHref() . $requestUri, $uri->getBaseHref() . $key) !== false) {
@@ -90,25 +91,30 @@ class Router
             }
 
             if (isset($action)) {
-                $controller = new $action['namespace'];
                 $method = $action['method'];
                 $params = $action['params'];
-                $typeResponse = $action['typeResponse'];
-                $uriformat = $action['params'];
 
-                putenv('TYPE_RESPONSE=' . $typeResponse);
-                $_SERVER['TYPE_RESPONSE'] = $typeResponse;
-                $_ENV['TYPE_RESPONSE'] = $typeResponse;
+                putenv('TYPE_RESPONSE=' . $action['typeResponse']);
+                $_SERVER['TYPE_RESPONSE'] = $action['typeResponse'];
+                $_ENV['TYPE_RESPONSE'] = $action['typeResponse'];
 
+                \Silnik\Logs\LogLoad::setInstance(
+                    filename: PATH_LOG . '/loadpage.json',
+                    namespace: $action['namespace'],
+                    method: $action['method'],
+                    actionUri: $action['uri'],
+                    methodHttp: $requestMethod
+                );
+                $controller = new $action['namespace'];
                 if (!empty($method) && method_exists($controller, $method) && is_callable([$controller, $method])) {
                     if (is_array($params) && count($params) > 0) {
                         $idSender = null;
                         $paramsSender = [];
-                        foreach ($uriformat as $k => $v) {
+                        foreach ($params as $k => $v) {
                             if ($v == '{id}') {
                                 $idSender = (int)$uri->nextSlice($k);
                             } else {
-                                $paramsSender[substr($v, 1, -1)] = $uri->nextSlice($k);
+                                $paramsSender[$k] = $uri->nextSlice($k);
                             }
                         }
                         if (!is_null($idSender)) {
@@ -131,10 +137,39 @@ class Router
                     $method->show();
                 }
 
-                return $action['namespace'];
+                return $action;
             }
-
-            return null;
         }
+        $this->pageError(404, $requestMethod);
+    }
+    public function pageError($code, $requestMethod)
+    {
+        $action['namespace'] = 'Controller\PageError';
+
+        $action['actionUri'] = $_SERVER['REQUEST_URI'];
+        $action['params'] = '';
+        if ($_SERVER['TYPE_RESPONSE'] == 'JSON') {
+            $action['method'] = 'showJson';
+        } else {
+            $action['method'] = 'showHtml';
+        }
+
+        \Silnik\Logs\LogLoad::setInstance(
+            filename: PATH_LOG . '/loadpage.json',
+            namespace: $action['namespace'],
+            method: $action['method'],
+            actionUri: $action['actionUri'],
+            methodHttp: $requestMethod
+        );
+        $controller = new $action['namespace'];
+        if ($_SERVER['TYPE_RESPONSE'] == 'JSON') {
+            $action['method'] = 'showJson';
+            $controller->showJson($code);
+        } else {
+            $action['method'] = 'showHtml';
+            $controller->showHtml($code);
+        }
+
+        return $action;
     }
 }

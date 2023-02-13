@@ -1,5 +1,6 @@
 <?php
 
+
 declare(strict_types=1);
 
 namespace Silnik\Foundation;
@@ -8,8 +9,8 @@ use Silnik\Sessions\Sessions;
 use Silnik\Cache\Cache;
 use Silnik\Uri\Uri;
 use Silnik\Http\Http;
-use Silnik\Logs\{ErrorPhp,LogLoad};
-use Silnik\Dotenv\{Dotenv,DefaultEnv};
+use Silnik\Logs\{ErrorPhp};
+use Silnik\Dotenv\{Dotenv};
 
 class Kernel
 {
@@ -87,9 +88,7 @@ class Kernel
     }
     private static function varEnviroment()
     {
-        (new Dotenv())->mergeEnv(
-            (new DefaultEnv())->getData()
-        )->load(PATH_ROOT)->build();
+        $env = (new Dotenv())->load(PATH_ROOT);
     }
     private function database()
     {
@@ -119,32 +118,14 @@ class Kernel
             header('Location: ' . $this->uri->getBaseHref());
             exit;
         } else {
-            // element com ponto
-            if (!empty($arrayURI[2])) {
-                $pos = strripos($arrayURI[2], '?');
-                $v = '';
-                if ($pos === true) {
-                    $ext = explode('?', $arrayURI[2]);
-                    $v = $ext[1];
-                    $ext = $ext[0];
-                } else {
-                    $ext = $arrayURI[2];
-                }
-            } else {
-                $router = new \Silnik\Router\Router();
-                $router->registerRoutesFromControllerAttributes(require_once PATH_ROOT . '/config/routes.php');
-                $namespace = $router->resolve($this->uri->getUri(), $this->http->method());
-                if (!is_null($namespace)) {
-                    $LogLoad = (new LogLoad(['path' => PATH_LOG, 'limit' => 5]));
-                    $LogLoad->register($namespace . ':' . $this->http->method());
-                } else {
-                    $controller = new \Controller\NotFound();
-                    if ($_SERVER['TYPE_RESPONSE'] == 'JSON') {
-                        $controller->showJson();
-                    } else {
-                        $controller->showHtml();
-                    }
-                }
+            $router = new \Silnik\Router\Router();
+            $router->registerRoutesFromControllerAttributes(require_once PATH_ROOT . '/config/routes.php');
+
+            try {
+                $router->resolve($this->uri->getUri(), $this->http->method());
+            } catch (\Throwable $th) {
+                ErrorPhp::registerError(message: $th->getMessage(), level:'ERROR');
+                $router->pageError(500, $this->http->method());
             }
         }
     }

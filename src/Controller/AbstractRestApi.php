@@ -50,8 +50,7 @@ abstract class AbstractRestApi
             $this->status(static::ERRO_UNAUTHORIZED);
             $this->response('auth', false)->dumpJson();
         } else {
-            $this->response('auth', $consult['auth'])
-                ->response('activity', $consult['status']);
+            $this->response('auth', $consult['auth']);
         }
 
         return $this;
@@ -70,9 +69,9 @@ abstract class AbstractRestApi
         }
     }
 
-    public function status($v)
+    public function status($code)
     {
-        $this->code = $v;
+        $this->code = $code;
 
         return $this;
     }
@@ -134,17 +133,15 @@ abstract class AbstractRestApi
 
     public function dumpJson()
     {
-        unset($this->data['load']);
         if (is_null($this->response('message'))) {
             $this->defaultMessage(Http::getInstance()->method(), $this->code);
         }
         //ob_start('ob_gzhandler');
-        header('Content-Type: application/json');
+        header('Content-Type: application/json; charset=utf-8');
         header('Cache-Control: must-revalidate');
         header('Expires: ' . gmdate('D, d M Y H:i:s', time() + ($this->cacheExpiresMins * 60)) . ' GMT');
         http_response_code($this->code);
-        echo json_encode($this->data, JSON_UNESCAPED_UNICODE);
-
+        echo json_encode(value: $this->data, flags: JSON_UNESCAPED_UNICODE);
         $this->end(10);
     }
 

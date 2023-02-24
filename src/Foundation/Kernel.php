@@ -25,11 +25,16 @@ class Kernel
     public function __construct(string $type = 'web')
     {
         if (!defined('PATH_ROOT')) {
-            define('PATH_ROOT', dirname(__FILE__, ($type == 'terminal') ? 6 : 1));
+            define(
+                constant_name: 'PATH_ROOT',
+                value: dirname(
+                    path: __FILE__,
+                    levels: ($type == 'terminal') ? 6 : 1
+                )
+            );
         }
         self::varEnviroment();
         self::setDefines();
-        define('DEPLOY_HASH', $this->getHashDeploy());
     }
 
     public function bootstrap()
@@ -45,15 +50,34 @@ class Kernel
 
     private static function setDefines()
     {
-        define('UPLOAD_PUBLIC', str_replace('/public', '', $_ENV['PATH_UPLOAD_PUBLIC']));
-        define('PATH_UPLOAD_PUBLIC', PATH_ROOT . $_ENV['PATH_UPLOAD_PUBLIC']);
-        define('PATH_UPLOAD_PRIVARTE', PATH_ROOT . $_ENV['PATH_UPLOAD_PRIVARTE']);
-        define('PATH_SESSIONS', PATH_ROOT . $_ENV['PATH_SESSIONS']);
-        define('PATH_TMP', PATH_ROOT . $_ENV['PATH_TMP']);
-        define('PATH_LOG', PATH_ROOT . $_ENV['PATH_LOG']);
-        define('PATH_MIGRATIONS', PATH_ROOT . $_ENV['PATH_MIGRATIONS']);
-        define('PATH_DATABASE', PATH_ROOT . $_ENV['PATH_DATABASE']);
-        define('PATH_CACHE', PATH_ROOT . $_ENV['PATH_CACHE']);
+        define(
+            constant_name: 'UPLOAD_PUBLIC',
+            value: str_replace(search: '/public', replace: '', subject: $_ENV['PATH_UPLOAD_PUBLIC'])
+        );
+        define(
+            constant_name: 'PATH_UPLOAD_PUBLIC',
+            value: PATH_ROOT . $_ENV['PATH_UPLOAD_PUBLIC']
+        );
+        define(
+            constant_name: 'PATH_UPLOAD_PRIVARTE',
+            value: PATH_ROOT . $_ENV['PATH_UPLOAD_PRIVARTE']
+        );
+        define(
+            constant_name: 'PATH_SESSIONS',
+            value: PATH_ROOT . $_ENV['PATH_SESSIONS']
+        );
+        define(
+            constant_name: 'PATH_TMP',
+            value: PATH_ROOT . $_ENV['PATH_TMP']
+        );
+        define(
+            constant_name: 'PATH_LOG',
+            value: PATH_ROOT . $_ENV['PATH_LOG']
+        );
+        define(
+            constant_name: 'PATH_CACHE',
+            value: PATH_ROOT . $_ENV['PATH_CACHE']
+        );
 
 
         $makeDirectoryENV = [
@@ -62,38 +86,44 @@ class Kernel
             PATH_SESSIONS,
             PATH_TMP,
             PATH_LOG,
-            PATH_MIGRATIONS,
-            PATH_DATABASE,
             PATH_CACHE,
         ];
 
         foreach ($makeDirectoryENV as $dir) {
-            if (!is_dir($dir)) {
-                mkdir($dir, 0777);
+            if (!is_dir(filename: $dir)) {
+                mkdir(
+                    directory: $dir,
+                    permissions: 0777,
+                    recursive: true
+                );
             }
         }
     }
 
     private function sessions()
     {
-        return (new Sessions($path = PATH_SESSIONS))->start();
+        return (new Sessions(
+            path: PATH_SESSIONS
+        ))->start();
     }
-    private function logs()
+    private function logs(): ErrorPhp
     {
         return new ErrorPhp();
     }
-    private function cache()
+    private function cache(): Cache
     {
         return new Cache();
     }
-    private static function varEnviroment()
+    private static function varEnviroment(): void
     {
-        $env = (new Dotenv())->load(PATH_ROOT);
+        (new Dotenv())->load(
+            path: PATH_ROOT
+        );
     }
-    private function database()
+    private function database(): void
     {
         if (
-            class_exists('\Silnik\ORM\EntityManagerFactory') &&
+            class_exists(class: '\Silnik\ORM\EntityManagerFactory') &&
             isset($_ENV['DB_USERNAME']) && !empty($_ENV['DB_USERNAME']) &&
             isset($_ENV['DB_PASSWORD']) && !empty($_ENV['DB_PASSWORD']) &&
             isset($_ENV['DB_DATABASE']) && !empty($_ENV['DB_DATABASE'])
@@ -103,60 +133,69 @@ class Kernel
         }
     }
 
-    private function mount()
+    private function mount(): void
     {
         // path
         if (!preg_match(
-            '/^' . str_replace('/', '\/', '/') . // INVALID_PATH_RE
+            pattern: '/^' . str_replace(search: '/', replace: '\/', subject: '/') . // INVALID_PATH_RE
             '(.*?)?' . // pathURI [1]
             '([^\/?]*\..*)?' . // elemento com "." [2]
             '(\?.*)?$/',  // elemento QS [3]
-            $this->uri->getUri(),
-            $arrayURI
+            subject: $this->uri->getUri(),
+            matches: $arrayURI
         )
         ) {
-            header('Location: ' . $this->uri->getBaseHref());
+            header(header: 'Location: ' . $this->uri->getBaseHref());
             exit;
         } else {
             $router = new \Silnik\Router\Router();
-            $router->registerRoutesFromControllerAttributes(require_once PATH_ROOT . '/config/routes.php');
+            $router->registerRoutesFromControllerAttributes(
+                controllers: require_once PATH_ROOT . '/src/routes.php'
+            );
 
             try {
-                $router->resolve($this->uri->getUri(), $this->http->method());
+                $router->resolve(
+                    requestUri: $this->uri->getUri(),
+                    requestMethod: $this->http->method()
+                );
             } catch (\Throwable $th) {
-                ErrorPhp::registerError(message: $th->getMessage(), level:'ERROR');
-                $router->pageError(500, $this->http->method());
+                ErrorPhp::registerError(
+                    message: $th->getMessage(),
+                    level:'ERROR'
+                );
+                $router->pageError(
+                    code: 500,
+                    requestMethod: $this->http->method()
+                );
             }
         }
     }
-    public static function getHashDeploy()
-    {
-        if (file_exists(PATH_LOG . '/deploy.log')) {
-            $deploylog = json_decode(file_get_contents(PATH_LOG . '/deploy.log'), true);
-            if (!is_null($deploylog) && is_array($deploylog) && isset($deploylog['hash']) && !empty($deploylog['hash'])) {
-                return $deploylog['hash'];
-            }
-        }
-    }
-
     public static function afterDeploy()
     {
-        if (!defined('PATH_ROOT')) {
-            define('PATH_ROOT', dirname(__FILE__, 6));
+        if (!defined(constant_name: 'PATH_ROOT')) {
+            define(
+                constant_name: 'PATH_ROOT',
+                value: dirname(
+                    path: __FILE__,
+                    levels: 6
+                )
+            );
         }
         self::varEnviroment();
         self::setDefines();
 
-        Cache::clearPath(PATH_CACHE);
-        Cache::clearPath(PATH_TMP);
+        Cache::clearPath(dir: PATH_TMP);
 
-
-        $hash = substr(md5((string)time()), 0, 7);
+        $hash = substr(string: md5(string: (string)time()), offset: 0, length: 7);
         file_put_contents(
-            PATH_LOG . '/deploy.log',
-            json_encode(['hash' => $hash,
-                'generatedTime' => date('Y-m-d H:i:s'),
-            ], JSON_PRETTY_PRINT)
+            filename: PATH_LOG . '/deploy.log',
+            data: json_encode(
+                value: [
+                    'hash' => $hash,
+                    'generatedTime' => date(format: 'Y-m-d H:i:s'),
+                ],
+                flags: JSON_PRETTY_PRINT
+            )
         );
 
         return $hash;

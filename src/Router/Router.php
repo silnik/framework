@@ -18,12 +18,12 @@ class Router
     {
         $uri = Uri::getInstance();
         foreach ($controllers as $controller) {
-            $reflectionController = new \ReflectionClass($controller);
+            $reflectionController = new \ReflectionClass(objectOrClass: $controller);
             $parent = $reflectionController->getParentClass();
             if ($parent != false) {
-                $typeResponse = (strtolower(substr($parent->getName(), -3)) == 'api' ? 'JSON' : 'HTML');
+                $typeResponse = (strtolower(string: substr(string: $parent->getName(), offset: -3)) == 'api' ? 'JSON' : 'HTML');
             } else {
-                $typeResponse = 'HTML';
+                $typeResponse = 'JSON';
             }
 
             foreach ($reflectionController->getMethods() as $method) {
@@ -33,7 +33,12 @@ class Router
                     if (!empty($attributes)) {
                         $comment = '';
                         if ($call->getDocComment() != false) {
-                            $comment = preg_match_all("#([a-zA-Z]+\s*[a-zA-Z0-9, ()_].*)#", $call->getDocComment(), $matches, PREG_PATTERN_ORDER);
+                            $comment = preg_match_all(
+                                pattern: "#([a-zA-Z]+\s*[a-zA-Z0-9, ()_].*)#",
+                                subject: $call->getDocComment(),
+                                matches: $matches,
+                                flags: PREG_PATTERN_ORDER
+                            );
                             $comment = $matches[0][0];
                         }
                         foreach ($attributes as $attribute) {
@@ -82,19 +87,23 @@ class Router
     public function resolve(string $requestUri, string $requestMethod)
     {
         $uri = Uri::getInstance();
+        $baseHref = rtrim(string: $uri->getBaseHref(), characters: '/');
 
         if (isset($this->routes[$requestMethod])) {
             foreach ($this->routes[$requestMethod] as $key => $value) {
-                if (mb_strpos($uri->getBaseHref() . $requestUri, $uri->getBaseHref() . $key) !== false) {
-                    $action = $this->routes[$requestMethod][$key] ?? null;
+                if (mb_strpos(
+                    haystack: $baseHref . rtrim(string: $requestUri, characters: '/'),
+                    needle: $baseHref . rtrim(string: $key, characters: '/')
+                ) !== false
+                ) {
+                    $action = $this->routes[$requestMethod][rtrim(string: $key, characters: '/')] ?? null;
                 }
             }
-
             if (isset($action)) {
                 $method = $action['method'];
                 $params = $action['params'];
 
-                putenv('TYPE_RESPONSE=' . $action['typeResponse']);
+                putenv(assignment: 'TYPE_RESPONSE=' . $action['typeResponse']);
                 $_SERVER['TYPE_RESPONSE'] = $action['typeResponse'];
                 $_ENV['TYPE_RESPONSE'] = $action['typeResponse'];
 
@@ -106,18 +115,21 @@ class Router
                     methodHttp: $requestMethod
                 );
                 $controller = new $action['namespace'];
-                if (!empty($method) && method_exists($controller, $method) && is_callable([$controller, $method])) {
-                    if (is_array($params) && count($params) > 0) {
+                if (!empty($method) && method_exists(
+                    object_or_class: $controller,
+                    method: $method
+                ) && is_callable(value: [$controller, $method])) {
+                    if (is_array(value: $params) && count(value: $params) > 0) {
                         $idSender = null;
                         $paramsSender = [];
                         foreach ($params as $k => $v) {
                             if ($v == '{id}') {
-                                $idSender = (int)$uri->nextSlice($k);
+                                $idSender = (int)$uri->nextSlice(ref: $k);
                             } else {
-                                $paramsSender[$k] = $uri->nextSlice($k);
+                                $paramsSender[$k] = $uri->nextSlice(ref: $k);
                             }
                         }
-                        if (!is_null($idSender)) {
+                        if (!is_null(value: $idSender)) {
                             if (!empty($paramsSender)) {
                                 $controller->$method($idSender, $paramsSender);
                             } else {
@@ -133,14 +145,19 @@ class Router
                     } else {
                         $controller->$method();
                     }
-                } elseif (method_exists($controller, 'show') && is_callable([$controller, 'show'])) {
+                } elseif (method_exists(
+                    object_or_class: $controller,
+                    method: 'show'
+                ) && is_callable(
+                    value: [$controller, 'show']
+                )) {
                     $method->show();
                 }
 
                 return $action;
             }
         }
-        $this->pageError(404, $requestMethod);
+        $this->pageError(code: 404, requestMethod: $requestMethod);
     }
     public function pageError($code, $requestMethod)
     {
@@ -161,6 +178,7 @@ class Router
             actionUri: $action['actionUri'],
             methodHttp: $requestMethod
         );
+
         $controller = new $action['namespace'];
         if ($_SERVER['TYPE_RESPONSE'] == 'JSON') {
             $action['method'] = 'showJson';

@@ -82,9 +82,13 @@ class Http
         } elseif (is_array($params)) {
             $ret = $this->data($params);
         }
-        if (is_null($ret)) {
+        if (is_null($ret) && $required == true) {
             throw new \Exception($params . ' is required', 400);
         } else {
+            if (is_null($ret)) {
+                return null;
+            }
+
             return match ($forceType) {
                 'int' => (int) $ret,
                 'string' => (string) $ret,

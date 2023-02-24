@@ -24,7 +24,7 @@ class Dotenv
             'PATH_SESSIONS' => '/.storage/sess',
             'PATH_TMP' => '/.storage/tmp',
             'PATH_LOG' => '/.storage/log',
-            'PATH_MIGRATIONS' => '/.storage/migrations',
+            'PATH_MIGRATIONS' => '/src/Migrations',
             'PATH_DATABASE' => '/.storage/database',
             'PATH_CACHE' => '/.storage/cache',
 

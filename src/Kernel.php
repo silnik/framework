@@ -167,21 +167,26 @@ class Kernel
             }
         }
     }
-    public static function afterDeploy()
+    /**
+     * Funtion to execute after function
+     *
+     * @return void
+     */
+    public static function afterDeploy(): void
     {
         if (!defined(constant_name: 'PATH_ROOT')) {
             define(
                 constant_name: 'PATH_ROOT',
                 value: dirname(
                     path: __FILE__,
-                    levels: 6
+                    levels: 5
                 )
             );
         }
         self::varEnviroment();
         self::setDefines();
 
-        Cache::clearPath(dir: PATH_TMP);
+        // Cache::clearPath(dir: PATH_TMP);
 
         $hash = substr(string: md5(string: (string)time()), offset: 0, length: 7);
         file_put_contents(
@@ -195,6 +200,8 @@ class Kernel
             )
         );
 
-        return $hash;
+        if (!file_exists(PATH_LOG . '/.sync-state.json')) {
+            file_put_contents(PATH_LOG . '/.sync-state.json', '{}');
+        }
     }
 }

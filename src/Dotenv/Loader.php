@@ -11,6 +11,10 @@ class Loader
             'APP_ENV' => 'production',
             'APP_URL' => 'http://localhost/',
 
+            'ACCESS_ORIGIN' => '*',
+            'ACCESS_HEADERS' => 'Origin, Content-Type, Accept, Authorization',
+            'ACCESS_METHODS' => 'POST, PUT, GET, PATCH, DELETE',
+
             'DB_DRIVER' => 'pdo_mysql',
             'DB_PORT' => '3306',
             'DB_HOST' => '',
@@ -25,13 +29,28 @@ class Loader
             'PATH_TMP' => '/.storage/tmp',
             'PATH_LOG' => '/.storage/log',
             'PATH_MIGRATIONS' => '/src/Migrations',
-            'PATH_DATABASE' => '/.storage/database',
+            'PATH_DATABASE' => '',
             'PATH_CACHE' => '/.storage/cache',
 
             'SESSION_LIFETIME' => 120,
-            'PRIVATE_KEY' => md5(time()),
+            'PRIVATE_KEY' => md5(string: time()),
             'CACHE_TWIG' => false,
         ];
+
+        if (file_exists(filename: PATH_ROOT . $this->env['PATH_LOG'] . '/deploy.log')) {
+            $dataDeploy = json_decode(
+                json: file_get_contents(
+                    filename: PATH_ROOT . $this->env['PATH_LOG'] . '/deploy.log'
+                ),
+                associative: true
+            );
+            if (isset($dataDeploy['name'])) {
+                $this->env['APP_NAME'] = $dataDeploy['name'];
+            }
+            if (isset($dataDeploy['version'])) {
+                $this->env['APP_VERSION'] = $dataDeploy['version'];
+            }
+        }
     }
 
     /**
@@ -72,8 +91,8 @@ class Loader
     public function build(): self
     {
         if (
-            !file_exists(PATH_ROOT . '\.storage\cache\.cert.enc') &&
-            file_exists(PATH_ROOT . '\.env')
+            !file_exists(PATH_ROOT . '/.storage/cache/.cert.enc') &&
+            file_exists(PATH_ROOT . '/.env')
         ) {
             $this->load(PATH_ROOT);
         }
@@ -82,8 +101,8 @@ class Loader
             putenv(sprintf('%s=%s', $k, $v));
         }
 
-        if (file_exists(PATH_ROOT . '\.storage\cache\.cert.enc')) {
-            (new SecureEnvPHP())->parse(PATH_ROOT . '\.storage\cache\.cert.enc', PATH_ROOT . '\.storage\cache\.cert.key');
+        if (file_exists(PATH_ROOT . '/.storage/cache/.cert.enc')) {
+            (new SecureEnvPHP())->parse(PATH_ROOT . '/.storage/cache/.cert.enc', PATH_ROOT . '/.storage/cache/.cert.key');
         }
 
         return $this;

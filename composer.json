@@ -10,10 +10,17 @@
         }
     },
     "require": {
-        "filp/whoops": "^2.14"
+        "ext-pdo": "*",
+        "doctrine/orm": "3.0.x-dev",
+        "doctrine/dbal": "3.6.x-dev",
+        "symfony/cache": "^6.2",
+        "doctrine/doctrine-laminas-hydrator": "^3.3",
+        "moneyphp/money": "4.1.0",
+        "verot/class.upload.php": "*"
     },
     "require-dev": {
-        "symfony/var-dumper": "^2.6 || ^3.0 || ^4.0 || ^5.0"
+        "filp/whoops": "^2.14",
+        "doctrine/migrations": "^3.5"
     },
     "autoload": {
         "psr-4": {

@@ -13,12 +13,6 @@ class Http
 
     public function __construct()
     {
-        header('Access-Control-Allow-Methods: POST, PUT, GET, PATCH, DELETE');
-        header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization');
-
-        if (getenv('APP_ENV') != 'production') {
-            header('Access-Control-Allow-Origin: *');
-        }
         foreach (getallheaders() as $k => $v) {
             $this->headers[$k] = $v;
         }
@@ -66,7 +60,6 @@ class Http
     {
         return ($this->method == 'DELETE');
     }
-
 
     /**
      *

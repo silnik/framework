@@ -1,8 +1,5 @@
 <?php
 
-
-declare(strict_types=1);
-
 namespace Silnik;
 
 use Silnik\Logs\ErrorPhp;
@@ -34,6 +31,7 @@ class Kernel
 
     public function bootstrap()
     {
+        $this->setHeaders();
         $this->uri = Uri::getInstance();
         $this->http = Http::getInstance();
         $this->sessions();
@@ -78,7 +76,6 @@ class Kernel
             value: PATH_ROOT . getenv('PATH_MIGRATIONS')
         );
 
-
         $makeDirectoryENV = [
             PATH_UPLOAD_PUBLIC,
             PATH_UPLOAD_PRIVARTE,
@@ -117,7 +114,7 @@ class Kernel
     {
         (new Dotenv\Loader())->build();
     }
-    private function database(): void
+    private function database()
     {
         if (
             class_exists(class: '\Silnik\ORM\EntityManagerFactory') &&
@@ -126,10 +123,19 @@ class Kernel
            !empty(getenv('DB_DATABASE'))
 
         ) {
-            \Silnik\ORM\ORM::startEntityManager();
+            \Silnik\ORM::startEntityManager();
         }
     }
-
+    private function setHeaders(): void
+    {
+        header('Access-Control-Allow-Origin: ' . getenv('ACCESS_ORIGIN'));
+        header('Access-Control-Allow-Headers: ' . getenv('ACCESS_HEADERS'));
+        header('Access-Control-Allow-Methods: ' . getenv('ACCESS_METHODS'));
+        if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+            header('HTTP/1.1 200 OK');
+            die();
+        }
+    }
     private function mount(): void
     {
         // path
@@ -167,6 +173,44 @@ class Kernel
             }
         }
     }
+    public static function terminalCommands($customCommands = []): void
+    {
+        // INSTANCE
+        $application = new \Symfony\Component\Console\Application(
+            getenv('APP_NAME'),
+            getenv('APP_VERSION')
+        );
+
+        // ORM & MIGRATIONS
+        $entityManagerFactory = new \Silnik\ORM\EntityManagerFactory();
+        $entityManager = $entityManagerFactory->getEntityManager();
+
+        try {
+            \Doctrine\ORM\Tools\Console\ConsoleRunner::addCommands(
+                cli: $application,
+                entityManagerProvider: new \Doctrine\ORM\Tools\Console\EntityManagerProvider\SingleManagerProvider(
+                    entityManager: $entityManager
+                )
+            );
+            $dependencyFactory = \Doctrine\Migrations\DependencyFactory::fromEntityManager(
+                configurationLoader: \Silnik\ORM\Migrations\Migrations::config(),
+                emLoader: new \Doctrine\Migrations\Configuration\EntityManager\ExistingEntityManager(entityManager: $entityManager)
+            );
+            $migrationCommands = \Silnik\ORM\Migrations\Migrations::commands();
+            $application->addCommands(
+                commands: $migrationCommands(
+                    dependencyFactory: $dependencyFactory
+                )
+            );
+        } catch (\Throwable $th) {
+        }
+
+        //IMPORT NEW COMMANDS
+        $application->addCommands(commands: $customCommands);
+
+        //RUN CONSOLE
+        $application->run();
+    }
     /**
      * Funtion to execute after function
      *
@@ -185,23 +229,19 @@ class Kernel
         }
         self::varEnviroment();
         self::setDefines();
-
-        // Cache::clearPath(dir: PATH_TMP);
-
+        $composer = json_decode(json: file_get_contents(PATH_ROOT . '/composer.json'), associative: true);
         $hash = substr(string: md5(string: (string)time()), offset: 0, length: 7);
         file_put_contents(
             filename: PATH_LOG . '/deploy.log',
             data: json_encode(
                 value: [
+                    'name' => $composer['name'],
+                    'version' => $composer['version'],
                     'hash' => $hash,
                     'generatedTime' => date(format: 'Y-m-d H:i:s'),
                 ],
                 flags: JSON_PRETTY_PRINT
             )
         );
-
-        if (!file_exists(PATH_LOG . '/.sync-state.json')) {
-            file_put_contents(PATH_LOG . '/.sync-state.json', '{}');
-        }
     }
 }

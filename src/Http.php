@@ -1,6 +1,6 @@
 <?php
 
-namespace Silnik\Http;
+namespace Silnik;
 
 class Http
 {

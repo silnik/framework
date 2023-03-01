@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Silnik\Router;
 
-use Silnik\Uri\Uri;
+use Silnik\Uri;
+use Silnik\Route;
 
 class Router
 {
@@ -20,11 +21,6 @@ class Router
         foreach ($controllers as $controller) {
             $reflectionController = new \ReflectionClass(objectOrClass: $controller);
             $parent = $reflectionController->getParentClass();
-            if ($parent != false) {
-                $typeResponse = (strtolower(string: substr(string: $parent->getName(), offset: -3)) == 'api' ? 'JSON' : 'HTML');
-            } else {
-                $typeResponse = 'JSON';
-            }
 
             foreach ($reflectionController->getMethods() as $method) {
                 $call = new \ReflectionMethod($controller, $method->getName());
@@ -62,7 +58,7 @@ class Router
                             if (substr($url, -1) == '/') {
                                 $url = substr($url, 0, -1);
                             }
-                            $this->register($route['methods'], $url, ['uri' => $route[0], 'namespace' => $controller, 'method' => $method->getName(), 'params' => $params, 'typeResponse' => $typeResponse, 'message' => $comment ? $typeResponse . ' ' . $comment : '']);
+                            $this->register($route['methods'], $url, ['uri' => $route[0], 'namespace' => $controller, 'method' => $method->getName(), 'params' => $params,  'message' => $comment]);
                         }
                     }
                 }
@@ -102,10 +98,6 @@ class Router
             if (isset($action)) {
                 $method = $action['method'];
                 $params = $action['params'];
-
-                putenv(assignment: 'TYPE_RESPONSE=' . $action['typeResponse']);
-                $_SERVER['TYPE_RESPONSE'] = $action['typeResponse'];
-                $_ENV['TYPE_RESPONSE'] = $action['typeResponse'];
 
                 \Silnik\Logs\LogLoad::setInstance(
                     filename: PATH_LOG . '/loadpage.json',
@@ -165,28 +157,18 @@ class Router
 
         $action['actionUri'] = $_SERVER['REQUEST_URI'];
         $action['params'] = '';
-        if ($_SERVER['TYPE_RESPONSE'] == 'JSON') {
-            $action['method'] = 'showJson';
-        } else {
-            $action['method'] = 'showHtml';
-        }
 
         \Silnik\Logs\LogLoad::setInstance(
             filename: PATH_LOG . '/loadpage.json',
             namespace: $action['namespace'],
-            method: $action['method'],
+            method: 'show',
             actionUri: $action['actionUri'],
             methodHttp: $requestMethod
         );
 
         $controller = new $action['namespace'];
-        if ($_SERVER['TYPE_RESPONSE'] == 'JSON') {
-            $action['method'] = 'showJson';
-            $controller->showJson($code);
-        } else {
-            $action['method'] = 'showHtml';
-            $controller->showHtml($code);
-        }
+        $action['method'] = 'show';
+        $controller->show($code);
 
         return $action;
     }

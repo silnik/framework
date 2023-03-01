@@ -14,7 +14,7 @@ class ErrorPhp
 {
     public function __construct()
     {
-        if ($_ENV['APP_ENV'] != 'production') {
+        if (getenv('APP_ENV') != 'production') {
             error_reporting(E_ALL);
             ini_set('log_errors', 1);
             ini_set('display_errors', 1);
@@ -29,7 +29,7 @@ class ErrorPhp
             ini_set('error_log', PATH_LOG . '/php-error.log');
             ini_set('error_reporting', E_ALL);
         }
-        if ($_ENV['APP_ENV'] != 'production' && getenv('TYPE_REQUEST') == 'WEB') {
+        if (getenv('APP_ENV') != 'production') {
             $whoops = new Run;
             $whoops->pushHandler(new PrettyPageHandler)->register();
         } else {

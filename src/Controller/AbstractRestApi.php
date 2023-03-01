@@ -2,7 +2,7 @@
 
 namespace Silnik\Controller;
 
-use Silnik\Http\Http;
+use Silnik\Http;
 use Utils\Request;
 
 abstract class AbstractRestApi
@@ -44,10 +44,9 @@ abstract class AbstractRestApi
      * @param array $consult
      * @return AbstractRestApi
      */
-    public function auth(array $consult = [])
+    public function requireAuth(array $consult = [])
     {
         if (!isset($consult['auth']) || $consult['auth'] != true) {
-            $this->status(static::ERRO_UNAUTHORIZED);
             $this->response('auth', false)->dumpJson();
         } else {
             $this->response('auth', $consult['auth']);

@@ -1,6 +1,6 @@
 <?php
 
-namespace Silnik\Uri;
+namespace Silnik;
 
 class Uri
 {
@@ -14,35 +14,24 @@ class Uri
 
     private function __construct()
     {
-        $uriApp = parse_url($_ENV['APP_URL']);
+        $uriApp = parse_url(url: getenv('APP_URL'));
 
         $this->https = ($uriApp['scheme'] == 'https');
         $this->hostname = $uriApp['host'];
         $this->baseAppUrl = ($uriApp['path'] != '/' ? $uriApp['path'] : '');
 
-        $this->slices = explode('/', preg_replace('/^[\/]*(.*?)[\/]*$/', '\\1', str_replace($this->baseAppUrl, '', getenv('REQUEST_URI'))));
+        $this->slices = explode(separator: '/', string: preg_replace(pattern: '/^[\/]*(.*?)[\/]*$/', replacement: '\\1', subject: str_replace(search: $this->baseAppUrl, replace: '', subject: getenv('REQUEST_URI'))));
         $this->baseHref = ($this->https ? 'https://' : 'http://') . $this->hostname . $this->baseAppUrl . '/';
         $this->fullUri = ($this->https ? 'https://' : 'http://') . $this->hostname . getenv('REQUEST_URI');
 
-        $_SERVER['APP_URL'] = $_ENV['APP_URL'] = $this->baseHref;
-        putenv('APP_URL=' . $this->baseHref);
+        putenv(assignment: 'APP_URL=' . $this->baseHref);
 
-
-        if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] != 'GET' ||
-            mb_strpos($this->getUri(), 'api.') !== false ||
-            mb_strpos($this->getUri(), '/api/') !== false
-        ) {
-            putenv('TYPE_RESPONSE=JSON');
-        } else {
-            putenv('TYPE_RESPONSE=HTML');
-        }
-        $_SERVER['TYPE_RESPONSE'] = $_ENV['TYPE_RESPONSE'] = getenv('TYPE_RESPONSE');
         $this->forceLocations();
     }
 
     public static function getInstance()
     {
-        if (is_null(self::$instance)) {
+        if (is_null(value: self::$instance)) {
             self::$instance = new self();
         }
 
@@ -52,27 +41,27 @@ class Uri
     private function forceLocations()
     {
         if (!empty(getenv('REQUEST_SCHEME')) && getenv('REQUEST_SCHEME') == 'http' && $this->https == true) {
-            header('Location: ' . ($this->https == true ? 'https://' : 'http://') . $this->hostname . getenv('REQUEST_URI'));
+            header(header: 'Location: ' . ($this->https == true ? 'https://' : 'http://') . $this->hostname . getenv('REQUEST_URI'));
             exit;
         }
 
         if ($this->hostname == getenv('HTTP_HOST') . '/') {
-            header('Location: ' . ($this->https == true ? 'https://' : 'http://') . $this->hostname);
+            header(header: 'Location: ' . ($this->https == true ? 'https://' : 'http://') . $this->hostname);
             exit;
         }
     }
 
-    public function nextSlice($ref = '', $uri = null, $removeGets = true)
+    public function nextSlice($ref = '', $uri = null, $removeGets = true): bool|string
     {
         if ($removeGets == true) {
-            $this->slices = explode('/', explode('?', (is_null($uri) ? getenv('REQUEST_URI') : $uri))[0]);
+            $this->slices = explode(separator: '/', string: explode(separator: '?', string: (is_null(value: $uri) ? getenv('REQUEST_URI') : $uri))[0]);
         }
-        if (in_array($ref, $this->slices)) {
-            $pointer = reset($this->slices);
+        if (in_array(needle: $ref, haystack: $this->slices)) {
+            $pointer = reset(array: $this->slices);
             do {
-                $pointer = next($this->slices);
+                $pointer = next(array: $this->slices);
             } while ($pointer != $ref);
-            $pointer = next($this->slices);
+            $pointer = next(array: $this->slices);
 
             return $pointer;
         } else {
@@ -80,17 +69,17 @@ class Uri
         }
     }
 
-    public function prevSlice($ref = '', $uri = null, $removeGets = true)
+    public function prevSlice($ref = '', $uri = null, $removeGets = true): mixed
     {
         if ($removeGets == true) {
-            $slices = explode('/', $uri);
+            $slices = explode(separator: '/', string: $uri);
         }
-        if (in_array($ref, $slices)) {
-            $pointer = reset($slices);
+        if (in_array(needle: $ref, haystack: $slices)) {
+            $pointer = reset(array: $slices);
             do {
-                $pointer = next($slices);
+                $pointer = next(array: $slices);
             } while ($pointer != $ref);
-            $pointer = prev($slices);
+            $pointer = prev(array: $slices);
 
             return $pointer;
         } else {

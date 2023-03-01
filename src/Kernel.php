@@ -3,14 +3,9 @@
 
 declare(strict_types=1);
 
-namespace Silnik\Foundation;
+namespace Silnik;
 
-use Silnik\Sessions\Sessions;
-use Silnik\Cache\Cache;
-use Silnik\Uri\Uri;
-use Silnik\Http\Http;
-use Silnik\Logs\{ErrorPhp};
-use Silnik\Dotenv\{Dotenv};
+use Silnik\Logs\ErrorPhp;
 
 class Kernel
 {
@@ -29,7 +24,7 @@ class Kernel
                 constant_name: 'PATH_ROOT',
                 value: dirname(
                     path: __FILE__,
-                    levels: ($type == 'terminal') ? 6 : 1
+                    levels: ($type == 'terminal') ? 5 : 1
                 )
             );
         }
@@ -42,9 +37,9 @@ class Kernel
         $this->uri = Uri::getInstance();
         $this->http = Http::getInstance();
         $this->sessions();
-        $this->database();
         $this->logs();
         $this->cache();
+        $this->database();
         $this->mount();
     }
 
@@ -52,31 +47,35 @@ class Kernel
     {
         define(
             constant_name: 'UPLOAD_PUBLIC',
-            value: str_replace(search: '/public', replace: '', subject: $_ENV['PATH_UPLOAD_PUBLIC'])
+            value: str_replace(search: '/public', replace: '', subject: getenv('PATH_UPLOAD_PUBLIC'))
         );
         define(
             constant_name: 'PATH_UPLOAD_PUBLIC',
-            value: PATH_ROOT . $_ENV['PATH_UPLOAD_PUBLIC']
+            value: PATH_ROOT . getenv('PATH_UPLOAD_PUBLIC')
         );
         define(
             constant_name: 'PATH_UPLOAD_PRIVARTE',
-            value: PATH_ROOT . $_ENV['PATH_UPLOAD_PRIVARTE']
+            value: PATH_ROOT . getenv('PATH_UPLOAD_PRIVARTE')
         );
         define(
             constant_name: 'PATH_SESSIONS',
-            value: PATH_ROOT . $_ENV['PATH_SESSIONS']
+            value: PATH_ROOT . getenv('PATH_SESSIONS')
         );
         define(
             constant_name: 'PATH_TMP',
-            value: PATH_ROOT . $_ENV['PATH_TMP']
+            value: PATH_ROOT . getenv('PATH_TMP')
         );
         define(
             constant_name: 'PATH_LOG',
-            value: PATH_ROOT . $_ENV['PATH_LOG']
+            value: PATH_ROOT . getenv('PATH_LOG')
         );
         define(
             constant_name: 'PATH_CACHE',
-            value: PATH_ROOT . $_ENV['PATH_CACHE']
+            value: PATH_ROOT . getenv('PATH_CACHE')
+        );
+        define(
+            constant_name: 'PATH_MIGRATIONS',
+            value: PATH_ROOT . getenv('PATH_MIGRATIONS')
         );
 
 
@@ -116,17 +115,15 @@ class Kernel
     }
     private static function varEnviroment(): void
     {
-        (new Dotenv())->load(
-            path: PATH_ROOT
-        );
+        (new Dotenv\Loader())->build();
     }
     private function database(): void
     {
         if (
             class_exists(class: '\Silnik\ORM\EntityManagerFactory') &&
-            isset($_ENV['DB_USERNAME']) && !empty($_ENV['DB_USERNAME']) &&
-            isset($_ENV['DB_PASSWORD']) && !empty($_ENV['DB_PASSWORD']) &&
-            isset($_ENV['DB_DATABASE']) && !empty($_ENV['DB_DATABASE'])
+           !empty(getenv('DB_USERNAME')) &&
+           !empty(getenv('DB_PASSWORD')) &&
+           !empty(getenv('DB_DATABASE'))
 
         ) {
             \Silnik\ORM\ORM::startEntityManager();

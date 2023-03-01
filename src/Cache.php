@@ -1,6 +1,6 @@
 <?php
 
-namespace Silnik\Cache;
+namespace Silnik;
 
 class Cache
 {

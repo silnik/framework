@@ -2,15 +2,14 @@
 
 namespace Silnik\Dotenv;
 
-class Dotenv
+class Loader
 {
     public function __construct(
         private array $env = []
     ) {
         $this->env = [
-            'APP_ENV' => 'development',
+            'APP_ENV' => 'production',
             'APP_URL' => 'http://localhost/',
-            'API_ENDPOINT' => 'http://localhost/api/',
 
             'DB_DRIVER' => 'pdo_mysql',
             'DB_PORT' => '3306',
@@ -18,6 +17,7 @@ class Dotenv
             'DB_USERNAME' => '',
             'DB_PASSWORD' => '',
             'DB_DATABASE' => '',
+            'DB_CHARSET' => 'utf8',
 
             'PATH_UPLOAD_PUBLIC' => '/public/uploads',
             'PATH_UPLOAD_PRIVARTE' => '/.storage/uploads',
@@ -30,8 +30,6 @@ class Dotenv
 
             'SESSION_LIFETIME' => 120,
             'PRIVATE_KEY' => md5(time()),
-            'PREFIXE_KEY' => '',
-
             'CACHE_TWIG' => false,
         ];
     }
@@ -39,7 +37,7 @@ class Dotenv
     /**
      * Summary of load
      * @param string $path
-     * @return Dotenv
+     * @return Loader
      */
     public function load(string $path): self
     {
@@ -60,25 +58,32 @@ class Dotenv
     /**
      * Summary of mergeEnv
      * @param array $params
-     * @return Dotenv
+     * @return Loader
      */
     public function mergeEnv(array $params = []): void
     {
         $this->env = (array_merge($this->env, $params));
-        $this->build();
     }
-
 
     /**
      * Summary of build
-     * @return Dotenv
+     * @return Loader
      */
     public function build(): self
     {
+        if (
+            !file_exists(PATH_ROOT . '\.storage\cache\.cert.enc') &&
+            file_exists(PATH_ROOT . '\.env')
+        ) {
+            $this->load(PATH_ROOT);
+        }
+
         foreach ($this->env as $k => $v) {
             putenv(sprintf('%s=%s', $k, $v));
-            $_ENV[$k] = $v;
-            $_SERVER[$k] = $v;
+        }
+
+        if (file_exists(PATH_ROOT . '\.storage\cache\.cert.enc')) {
+            (new SecureEnvPHP())->parse(PATH_ROOT . '\.storage\cache\.cert.enc', PATH_ROOT . '\.storage\cache\.cert.key');
         }
 
         return $this;

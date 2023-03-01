@@ -16,9 +16,7 @@
         "symfony/cache": "^6.2",
         "doctrine/doctrine-laminas-hydrator": "^3.3",
         "moneyphp/money": "4.1.0",
-        "verot/class.upload.php": "*"
-    },
-    "require-dev": {
+        "verot/class.upload.php": "^2.1",
         "filp/whoops": "^2.14",
         "doctrine/migrations": "^3.5"
     },

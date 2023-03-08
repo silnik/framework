@@ -6,13 +6,14 @@ class Loader
 {
     public function __construct(
         private array $env = []
-    ) {
+    )
+    {
         $this->env = [
             'APP_ENV' => 'production',
             'APP_URL' => 'http://localhost/',
 
             'ACCESS_ORIGIN' => '*',
-            'ACCESS_HEADERS' => 'Origin, Content-Type, Accept, Authorization',
+            'ACCESS_HEADERS' => 'Origin, Content-Type, Accept, Authorization, Cache-Control',
             'ACCESS_METHODS' => 'POST, PUT, GET, PATCH, DELETE',
 
             'DB_DRIVER' => 'pdo_mysql',
@@ -39,10 +40,10 @@ class Loader
 
         if (file_exists(filename: PATH_ROOT . $this->env['PATH_LOG'] . '/deploy.log')) {
             $dataDeploy = json_decode(
-                json: file_get_contents(
-                    filename: PATH_ROOT . $this->env['PATH_LOG'] . '/deploy.log'
+            json: file_get_contents(
+                filename: PATH_ROOT . $this->env['PATH_LOG'] . '/deploy.log'
                 ),
-                associative: true
+            associative: true
             );
             if (isset($dataDeploy['name'])) {
                 $this->env['APP_NAME'] = $dataDeploy['name'];
@@ -61,15 +62,19 @@ class Loader
     public function load(string $path): self
     {
         $data = [];
-        $lines = file($path . '/.env');
+        $lines = file(filename: $path . '/.env');
 
         foreach ($lines as $line) {
-            if (mb_strpos($line, '=') !== false) {
-                [$key, $value] = explode('=', $line, 2);
-                $data[trim($key)] = str_replace(['"', "'"], '', trim($value));
+            if (
+                strlen(string: $line) > 3 &&
+                substr(string: $line, offset: 0, length: 1) != '#' &&
+                mb_strpos(haystack: $line, needle: '=') !== false
+            ) {
+                [$key, $value] = explode(separator: '=', string: $line, limit: 2);
+                $data[trim(string: $key)] = str_replace(search: ['"', "'"], replace: '', subject: trim(string: $value));
             }
         }
-        $this->mergeEnv($data);
+        $this->mergeEnv(params: $data);
 
         return $this;
     }

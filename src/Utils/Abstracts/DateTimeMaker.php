@@ -66,19 +66,32 @@ abstract class DateTimeMaker
     ];
 
     private $timeZonesBR = [
-        'AC' => 'America/Rio_branco',   'AL' => 'America/Maceio',
-        'AP' => 'America/Belem',        'AM' => 'America/Manaus',
-        'BA' => 'America/Bahia',        'CE' => 'America/Fortaleza',
-        'DF' => 'America/Sao_Paulo',    'ES' => 'America/Sao_Paulo',
-        'GO' => 'America/Sao_Paulo',    'MA' => 'America/Fortaleza',
-        'MT' => 'America/Cuiaba',       'MS' => 'America/Campo_Grande',
-        'MG' => 'America/Sao_Paulo',    'PR' => 'America/Sao_Paulo',
-        'PB' => 'America/Fortaleza',    'PA' => 'America/Belem',
-        'PE' => 'America/Recife',       'PI' => 'America/Fortaleza',
-        'RJ' => 'America/Sao_Paulo',    'RN' => 'America/Fortaleza',
-        'RS' => 'America/Sao_Paulo',    'RO' => 'America/Porto_Velho',
-        'RR' => 'America/Boa_Vista',    'SC' => 'America/Sao_Paulo',
-        'SE' => 'America/Maceio',       'SP' => 'America/Sao_Paulo',
+        'AC' => 'America/Rio_branco',
+        'AL' => 'America/Maceio',
+        'AP' => 'America/Belem',
+        'AM' => 'America/Manaus',
+        'BA' => 'America/Bahia',
+        'CE' => 'America/Fortaleza',
+        'DF' => 'America/Sao_Paulo',
+        'ES' => 'America/Sao_Paulo',
+        'GO' => 'America/Sao_Paulo',
+        'MA' => 'America/Fortaleza',
+        'MT' => 'America/Cuiaba',
+        'MS' => 'America/Campo_Grande',
+        'MG' => 'America/Sao_Paulo',
+        'PR' => 'America/Sao_Paulo',
+        'PB' => 'America/Fortaleza',
+        'PA' => 'America/Belem',
+        'PE' => 'America/Recife',
+        'PI' => 'America/Fortaleza',
+        'RJ' => 'America/Sao_Paulo',
+        'RN' => 'America/Fortaleza',
+        'RS' => 'America/Sao_Paulo',
+        'RO' => 'America/Porto_Velho',
+        'RR' => 'America/Boa_Vista',
+        'SC' => 'America/Sao_Paulo',
+        'SE' => 'America/Maceio',
+        'SP' => 'America/Sao_Paulo',
         'TO' => 'America/Araguaia',
     ];
 
@@ -90,23 +103,6 @@ abstract class DateTimeMaker
         $this->getDateOBJ()->setTimezone(new \DateTimeZone($this->getTimeZone()));
     }
 
-    public function statusLastSee(\DateTime $relativeTo)
-    {
-        $lastSee = ((new \DateTime)->format('U') - ($relativeTo)->format('U')) / 60;
-        if ($lastSee < 15) {
-            return 'on';
-        } elseif ($lastSee < 180) {
-            return 'away';
-        } elseif ($lastSee < 740) {
-            if ((int)(new \DateTime)->format('H') < 8 || (int)(new \DateTime)->format('H') > 19) {
-                return 'sleep';
-            } else {
-                return 'off';
-            }
-        }
-
-        return 'invisible';
-    }
     public function formattedInterval(\DateTime $relativeTo, $past = false, $minSeconds = 60, $abrev = false)
     {
         if (is_null($relativeTo)) {
@@ -131,10 +127,10 @@ abstract class DateTimeMaker
                         $part = $subparts[$n > 1 ? 2 : 1];
                     }
                     if ($past) {
-                        $part .= ' atr&aacute;s';
+                        $part .= ' atrás';
                     }
 
-                    return sprintf('%d %s', $n, $part);
+                    return sprintf('%d%s', $n, $part);
                 }
             }
         }
@@ -184,94 +180,94 @@ abstract class DateTimeMaker
 
     /**
      * @return string
-    */
+     */
     public function addDay($d)
     {
-        return $this->getDateOBJ()->add(new \DateInterval('P' . (int)$d . 'D'));
+        return $this->getDateOBJ()->add(new \DateInterval('P' . (int) $d . 'D'));
     }
 
     /**
      * @return string
-    */
+     */
     public function addMonth($m)
     {
-        return $this->getDateOBJ()->add(new \DateInterval('P' . (int)$m . 'D'));
+        return $this->getDateOBJ()->add(new \DateInterval('P' . (int) $m . 'D'));
     }
 
     /**
      * @return string
-    */
+     */
     public function addYear($y)
     {
-        return $this->getDateOBJ()->add(new \DateInterval('P' . (int)$y . 'Y'));
+        return $this->getDateOBJ()->add(new \DateInterval('P' . (int) $y . 'Y'));
     }
 
     /**
      * @return string
-    */
+     */
     public function addHour($h)
     {
-        return $this->getDateOBJ()->add(new \DateInterval('PT' . (int)$h . 'H'));
+        return $this->getDateOBJ()->add(new \DateInterval('PT' . (int) $h . 'H'));
     }
     /**
      * @return string
-    */
+     */
     public function addMinut($m)
     {
-        return $this->getDateOBJ()->add(new \DateInterval('PT' . (int)$m . 'M'));
+        return $this->getDateOBJ()->add(new \DateInterval('PT' . (int) $m . 'M'));
     }
     /**
      * @return string
-    */
+     */
     public function addSecond($s)
     {
-        return $this->getDateOBJ()->add(new \DateInterval('PT' . (int)$s . 'S'));
+        return $this->getDateOBJ()->add(new \DateInterval('PT' . (int) $s . 'S'));
     }
 
     /**
      * @return string
-    */
+     */
     public function subDay($d)
     {
-        return $this->getDateOBJ()->sub(new \DateInterval('P' . (int)$d . 'D'));
+        return $this->getDateOBJ()->sub(new \DateInterval('P' . (int) $d . 'D'));
     }
 
     /**
      * @return string
-    */
+     */
     public function subMonth($m)
     {
-        return $this->getDateOBJ()->sub(new \DateInterval('P' . (int)$m . 'D'));
+        return $this->getDateOBJ()->sub(new \DateInterval('P' . (int) $m . 'D'));
     }
 
     /**
      * @return string
-    */
+     */
     public function subYear($y)
     {
-        return $this->getDateOBJ()->sub(new \DateInterval('P' . (int)$y . 'Y'));
+        return $this->getDateOBJ()->sub(new \DateInterval('P' . (int) $y . 'Y'));
     }
 
     /**
      * @return string
-    */
+     */
     public function subHour($h)
     {
-        return $this->getDateOBJ()->sub(new \DateInterval('PT' . (int)$h . 'H'));
+        return $this->getDateOBJ()->sub(new \DateInterval('PT' . (int) $h . 'H'));
     }
     /**
      * @return string
-    */
+     */
     public function subMinut($m)
     {
-        return $this->getDateOBJ()->sub(new \DateInterval('PT' . (int)$m . 'M'));
+        return $this->getDateOBJ()->sub(new \DateInterval('PT' . (int) $m . 'M'));
     }
     /**
      * @return string
-    */
+     */
     public function subSecond($s)
     {
-        return $this->getDateOBJ()->sub(new \DateInterval('PT' . (int)$s . 'S'));
+        return $this->getDateOBJ()->sub(new \DateInterval('PT' . (int) $s . 'S'));
     }
 
     /**
@@ -354,7 +350,7 @@ abstract class DateTimeMaker
 
     public function returnMonthBr($length = 0)
     {
-        $ret = $this->monthsBR[(int)$this->month()];
+        $ret = $this->monthsBR[(int) $this->month()];
         if ($length > 0) {
             $ret = substr($ret, 0, $length);
         }

@@ -30,10 +30,10 @@ class Router
                         $comment = '';
                         if ($call->getDocComment() != false) {
                             $comment = preg_match_all(
-                                pattern: "#([a-zA-Z]+\s*[a-zA-Z0-9, ()_].*)#",
-                                subject: $call->getDocComment(),
-                                matches: $matches,
-                                flags: PREG_PATTERN_ORDER
+                            pattern: "#([a-zA-Z]+\s*[a-zA-Z0-9, ()_].*)#",
+                            subject: $call->getDocComment(),
+                            matches: $matches,
+                            flags: PREG_PATTERN_ORDER
                             );
                             $comment = $matches[0][0];
                         }
@@ -47,18 +47,15 @@ class Router
                                 preg_match_all("'{(.*?)}'si", $route[0], $match);
                                 foreach ($match[1] as $val) {
                                     $p = $uri->prevSlice(
-                                        ref: '{' . $val . '}',
-                                        uri: $route[0]
+                                    ref: '{' . $val . '}',
+                                    uri: $route[0]
                                     );
                                     if ($p != false) {
                                         $params[$p] = '{' . $val . '}';
                                     }
                                 }
                             }
-                            if (substr($url, -1) == '/') {
-                                $url = substr($url, 0, -1);
-                            }
-                            $this->register($route['methods'], $url, ['uri' => $route[0], 'namespace' => $controller, 'method' => $method->getName(), 'params' => $params,  'message' => $comment]);
+                            $this->register($route['methods'], $url, ['uri' => $route[0], 'namespace' => $controller, 'method' => $method->getName(), 'params' => $params, 'message' => $comment]);
                         }
                     }
                 }
@@ -66,7 +63,7 @@ class Router
         }
     }
 
-    public function register(array $requestMethod, string $route, callable|array $action): self
+    public function register(array $requestMethod, string $route, callable |array $action): self
     {
         foreach ($requestMethod as $method) {
             $this->routes[$method][$route] = $action;
@@ -84,15 +81,15 @@ class Router
     {
         $uri = Uri::getInstance();
         $baseHref = rtrim(string: $uri->getBaseHref(), characters: '/');
-
         if (isset($this->routes[$requestMethod])) {
             foreach ($this->routes[$requestMethod] as $key => $value) {
-                if (mb_strpos(
-                    haystack: $baseHref . rtrim(string: $requestUri, characters: '/'),
-                    needle: $baseHref . rtrim(string: $key, characters: '/')
-                ) !== false
+                if (
+                    mb_strpos(
+                    haystack: $baseHref . $requestUri,
+                    needle: $baseHref . $key
+                    ) !== false
                 ) {
-                    $action = $this->routes[$requestMethod][rtrim(string: $key, characters: '/')] ?? null;
+                    $action = $this->routes[$requestMethod][$key] ?? null;
                 }
             }
             if (isset($action)) {
@@ -100,23 +97,25 @@ class Router
                 $params = $action['params'];
 
                 \Silnik\Logs\LogLoad::setInstance(
-                    filename: PATH_LOG . '/loadpage.json',
-                    namespace: $action['namespace'],
-                    method: $action['method'],
-                    actionUri: $action['uri'],
-                    methodHttp: $requestMethod
+                filename: PATH_LOG . '/loadpage.json', namespace
+                    : $action['namespace'],
+                method: $action['method'],
+                actionUri: $action['uri'],
+                methodHttp: $requestMethod
                 );
                 $controller = new $action['namespace'];
-                if (!empty($method) && method_exists(
+                if (
+                    !empty($method) && method_exists(
                     object_or_class: $controller,
                     method: $method
-                ) && is_callable(value: [$controller, $method])) {
+                    ) && is_callable(value: [$controller, $method])
+                ) {
                     if (is_array(value: $params) && count(value: $params) > 0) {
                         $idSender = null;
                         $paramsSender = [];
                         foreach ($params as $k => $v) {
                             if ($v == '{id}') {
-                                $idSender = (int)$uri->nextSlice(ref: $k);
+                                $idSender = (int) $uri->nextSlice(ref: $k);
                             } else {
                                 $paramsSender[$k] = $uri->nextSlice(ref: $k);
                             }
@@ -137,12 +136,14 @@ class Router
                     } else {
                         $controller->$method();
                     }
-                } elseif (method_exists(
+                } elseif (
+                    method_exists(
                     object_or_class: $controller,
                     method: 'show'
-                ) && is_callable(
+                    ) && is_callable(
                     value: [$controller, 'show']
-                )) {
+                    )
+                ) {
                     $method->show();
                 }
 
@@ -159,11 +160,11 @@ class Router
         $action['params'] = '';
 
         \Silnik\Logs\LogLoad::setInstance(
-            filename: PATH_LOG . '/loadpage.json',
-            namespace: $action['namespace'],
-            method: 'show',
-            actionUri: $action['actionUri'],
-            methodHttp: $requestMethod
+        filename: PATH_LOG . '/loadpage.json', namespace
+            : $action['namespace'],
+        method: 'show',
+        actionUri: $action['actionUri'],
+        methodHttp: $requestMethod
         );
 
         $controller = new $action['namespace'];

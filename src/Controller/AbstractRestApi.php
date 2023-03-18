@@ -8,18 +8,18 @@ use Utils\Request;
 abstract class AbstractRestApi
 {
     /**
-       * Success
-       *   200 Ok
-       *   201 Created
-       *   204 No Content
-       * Client Erros
-       *   400 Bad Request
-       *   401 Unauthorized
-       *   404 Not Found
-       * Server Error
-       *   500 Internal Server Error
-       *
-    */
+     * Success
+     *   200 Ok
+     *   201 Created
+     *   204 No Content
+     * Client Erros
+     *   400 Bad Request
+     *   401 Unauthorized
+     *   404 Not Found
+     * Server Error
+     *   500 Internal Server Error
+     *
+     */
 
     final public const SUCCESS_OK = 200;
     final public const SUCCESS_CREATED = 201;
@@ -90,7 +90,8 @@ abstract class AbstractRestApi
     public function permission($can): self
     {
         if (!$can) {
-            $this->defaultMessage(Http::getInstance()->method(), self::ERRO_UNAUTHORIZED);
+            $this->status(self::ERRO_UNAUTHORIZED);
+            $this->defaultMessage(Http::getInstance()->method(), self::ERRO_UNAUTHORIZED)->dumpJson();
         }
 
         return $this;
@@ -99,28 +100,28 @@ abstract class AbstractRestApi
     /**
      * @param string $method
      * @param integer $code
-     * @return void
+     * @return self
      */
-    public function defaultMessage(string $method, int $code): void
+    public function defaultMessage(string $method, int $code): self
     {
         $msg = match ($code) {
             200 => match ($method) {
-                'PUT','PATCH' => 'Registro alterado com sucesso.',
-                'DELETE' => 'Registro removido com sucesso.',
-                default => '',
-            },
+                    'PUT', 'PATCH' => 'Registro alterado com sucesso.',
+                    'DELETE' => 'Registro removido com sucesso.',
+                    default => '',
+                },
             201 => match ($method) {
-                'POST' => 'Registro criado com sucesso.',
-                default => '',
-            },
+                    'POST' => 'Registro criado com sucesso.',
+                    default => '',
+                },
             204 => 'Sem conteúdo para retornar.',
             400 => 'Requisição mal formatada.',
             401 => match ($method) {
-                'POST' => 'Você não tem permissão para criar.',
-                'PUT','PATH' => 'Você não tem permissão para alterar.',
-                'DELETE' => 'Você não tenm permissão para remover.',
-                default => 'Você não tem permissão',
-            },
+                    'POST' => 'Você não tem permissão para criar.',
+                    'PUT', 'PATH' => 'Você não tem permissão para alterar.',
+                    'DELETE' => 'Você não tenm permissão para remover.',
+                    default => 'Você não tem permissão',
+                },
             404 => 'Rota não encontrada.',
             500 => 'Erro interno do servidor.',
             default => '',
@@ -128,6 +129,7 @@ abstract class AbstractRestApi
         if (!empty($msg)) {
             $this->response('message', $msg);
         }
+        return $this;
     }
 
     public function dumpJson()
@@ -157,9 +159,9 @@ abstract class AbstractRestApi
             $this->status($th->getCode())->response('message', $th->getMessage())->dumpJson();
         } else {
             \Silnik\Logs\ErrorPhp::registerError(
-                message: $th->getMessage(),
-                level: 'ERROR',
-                debug: debug_backtrace()
+            message: $th->getMessage(),
+            level: 'ERROR',
+            debug: debug_backtrace()
             );
             $this->status(500)->response('message', 'Internal Server Error')->dumpJson();
         }

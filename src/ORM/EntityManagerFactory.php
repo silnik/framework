@@ -35,14 +35,13 @@ class EntityManagerFactory
         }
         if ($this->connection) {
             $isDevMode = (getenv('APP_ENV') != 'production');
-
             $config = ORMSetup::createAttributeMetadataConfiguration(
-                [dirname(__DIR__, 4) . '/src/Entity'],
+                [dirname(__DIR__, 5) . '/src/Entity'],
                 $isDevMode,
                 null,
                 null
             );
-            $config->setProxyDir(dirname(__DIR__, 4) . '/src/DoctrineProxies');
+            $config->setProxyDir(dirname(__DIR__, 5) . '/src/DoctrineProxies');
 
             return new EntityManager(
                 DriverManager::getConnection($this->connection, $config),

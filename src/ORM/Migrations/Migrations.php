@@ -30,7 +30,7 @@ class Migrations
 
     public static function commands()
     {
-        return fn (DependencyFactory $dependencyFactory) => [
+        return fn(DependencyFactory $dependencyFactory) => [
             new CurrentCommand($dependencyFactory),
             new DumpSchemaCommand($dependencyFactory),
             new ExecuteCommand($dependencyFactory),

@@ -36,7 +36,7 @@ abstract class Mask
      *
      * @param  string $texto
      * @return string (Texto com a mascara)
-    */
+     */
     public static function maskFactory($txt = '', $mascara = '')
     {
         $txt = Mask::unmask($txt);

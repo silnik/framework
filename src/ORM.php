@@ -40,7 +40,7 @@ class ORM
         echo self::printSQL($query);
         exit;
     }
-     /**
+    /**
      * Get SQL from query
      *
      * @author Yosef Kaminskyi
@@ -53,7 +53,7 @@ class ORM
         $paramsList = self::getListParamsByDql($query->getDql());
         $paramsArr = self::getParamsArray($query->getParameters());
         $fullSql = '';
-        for ($i = 0;$i < strlen($sql);$i++) {
+        for ($i = 0; $i < strlen($sql); $i++) {
             if ($sql[$i] == '?') {
                 $nameParam = array_shift($paramsList);
 
@@ -74,7 +74,7 @@ class ORM
                     }
                     $fullSql .= $sqlArr;
                 } elseif (is_object($paramsArr[$nameParam])) {
-                    switch(get_class($paramsArr[$nameParam])) {
+                    switch (get_class($paramsArr[$nameParam])) {
                         case 'DateTime':
                             $fullSql .= "'" . $paramsArr[$nameParam]->format('Y-m-d H:i:s') . "'";
 
@@ -115,7 +115,7 @@ class ORM
         $parsedDql = preg_split('/:/', $dql);
         $length = count($parsedDql);
         $parmeters = [];
-        for ($i = 1;$i < $length;$i++) {
+        for ($i = 1; $i < $length; $i++) {
             if (ctype_alpha($parsedDql[$i][0])) {
                 $param = (preg_split("/[' ' )]/", $parsedDql[$i]));
                 $parmeters[] = $param[0];

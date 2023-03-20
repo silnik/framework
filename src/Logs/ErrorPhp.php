@@ -49,7 +49,6 @@ class ErrorPhp
     [2017-03-20 3:35:43] [INFO] [file.php] Here we are
     [2017-03-20 3:35:43] [ERROR] [file.php] Not good
     [2017-03-20 3:35:43] [DEBUG] [file.php] Regex empty
-
     mylog ('hallo') -> INFO
     mylog ('fail', 'e') -> ERROR
     mylog ('next', 'd') -> DEBUG

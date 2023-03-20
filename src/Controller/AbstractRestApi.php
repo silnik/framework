@@ -30,7 +30,7 @@ abstract class AbstractRestApi
     final public const ERRO_SERVERERROR = 500;
 
 
-    private $cacheExpiresMins = 1;
+    private $cacheExpiresMins = 0;
     private $code = self::SUCCESS_OK;
     private $data = [];
 
@@ -77,7 +77,7 @@ abstract class AbstractRestApi
 
     public function cacheExpiresMins($v = 1)
     {
-        $this->cacheExpiresMins = $v;
+        $this->cacheExpiresMins = (getenv('APP_ENV') !== 'production' ? $v : 0);
 
         return $this;
     }

@@ -34,7 +34,7 @@ abstract class Server
     // Returns used memory (either in percent (without percent sign) or free and overall in bytes)
     public static function getServerMemoryUsage()
     {
-        $memoryTotal = ((int)ini_get('memory_limit') * 1024 * 1024);
+        $memoryTotal = ((int) ini_get('memory_limit') * 1024 * 1024);
         $memoryUsage = memory_get_peak_usage();
         $memoryFree = $memoryTotal - $memoryUsage;
 

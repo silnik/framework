@@ -6,8 +6,7 @@ class Loader
 {
     public function __construct(
         private array $env = []
-    )
-    {
+    ) {
         $this->env = [
             'APP_ENV' => 'production',
             'APP_URL' => 'http://localhost/',
@@ -40,10 +39,10 @@ class Loader
 
         if (file_exists(filename: PATH_ROOT . $this->env['PATH_LOG'] . '/deploy.log')) {
             $dataDeploy = json_decode(
-            json: file_get_contents(
-                filename: PATH_ROOT . $this->env['PATH_LOG'] . '/deploy.log'
+                json: file_get_contents(
+                    filename: PATH_ROOT . $this->env['PATH_LOG'] . '/deploy.log'
                 ),
-            associative: true
+                associative: true
             );
             if (isset($dataDeploy['name'])) {
                 $this->env['APP_NAME'] = $dataDeploy['name'];

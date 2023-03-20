@@ -50,7 +50,8 @@ abstract class HumanizeBR
         1000000000000000000 => ['quinquilhão', 'quinquilhões'],
     ];
 
-    public const MONTH = [1 => 'janeiro',
+    public const MONTH = [
+        1 => 'janeiro',
         2 => 'fevereiro',
         3 => 'março',
         4 => 'abril',
@@ -61,15 +62,18 @@ abstract class HumanizeBR
         9 => 'setembro',
         10 => 'outubro',
         11 => 'novembro',
-        12 => 'dezembro', ];
+        12 => 'dezembro',
+    ];
 
-    public const WEEK = [0 => 'domingo',
+    public const WEEK = [
+        0 => 'domingo',
         1 => 'segunda',
         2 => 'terça',
         3 => 'quarta',
         4 => 'quinta',
         5 => 'sexta',
-        6 => 'sábado', ];
+        6 => 'sábado',
+    ];
 
     /**
      * Converts a unix timestamp to a relative time string, such as "3 days ago"

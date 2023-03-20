@@ -79,16 +79,17 @@ class Router
 
     public function resolve(string $requestUri, string $requestMethod)
     {
+        $combinationStrength = 0;
         $uri = Uri::getInstance();
         $baseHref = rtrim(string: $uri->getBaseHref(), characters: '/');
         if (isset($this->routes[$requestMethod])) {
             foreach ($this->routes[$requestMethod] as $key => $value) {
-                if (
-                    mb_strpos(
-                    haystack: $baseHref . $requestUri,
-                    needle: $baseHref . $key
-                    ) !== false
-                ) {
+                $s = mb_strpos(
+                haystack: $baseHref . $requestUri,
+                needle: $baseHref . $key
+                );
+                if ($s !== false && $combinationStrength <= (int) strlen($baseHref . $key)) {
+                    $combinationStrength = (int) strlen($baseHref . $key);
                     $action = $this->routes[$requestMethod][$key] ?? null;
                 }
             }
@@ -146,7 +147,6 @@ class Router
                 ) {
                     $method->show();
                 }
-
                 return $action;
             }
         }

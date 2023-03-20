@@ -27,7 +27,8 @@ class PrintCodeError
                 $this->text = 'A mensagem de serviço 503 indisponível significa que o servidor de origem do site não está disponível e geralmente é um estado temporário. Este erro pode ser acionado porque algo em execução no lado do servidor do site travou ou seu site está propositalmente fora do ar para manutenção.';
 
                 break;
-            default: break;
+            default:
+                break;
         }
         $this->print($log);
         http_response_code($code);

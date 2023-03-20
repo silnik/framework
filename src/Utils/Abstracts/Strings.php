@@ -67,7 +67,7 @@ abstract class Strings
             $caracteres .= $num;
         }
         $len = strlen($caracteres);
-        for ($n = 1;$n <= $tamanho;$n++) {
+        for ($n = 1; $n <= $tamanho; $n++) {
             $rand = mt_rand(1, $len);
             $retorno .= $caracteres[$rand - 1];
         }
@@ -81,8 +81,10 @@ abstract class Strings
         if (strlen($string) > $chars) {
             while (substr($string, $chars, 1) <> ' ' && ($chars < strlen($string))) {
                 $chars++;
-            };
-        };
+            }
+            ;
+        }
+        ;
 
         return strip_tags(substr($string, 0, $chars) . $ret);
     }
@@ -98,19 +100,21 @@ abstract class Strings
     {
         $p = mb_convert_encoding($p, 'UTF-8', 'ISO-8859-1');
         $d = ';;;';
-        $l = strlen((string)$p);
+        $l = strlen((string) $p);
         if ($l > 1) {
-            for ($i = 0;$i < $l;$i++) {
+            for ($i = 0; $i < $l; $i++) {
                 $a = ord($p[$i]);
                 $p[$i] = chr($a++);
             }
         } else {
             $a = ord($p);
             $p = chr($a++);
-        }$p = strrev($p);
+        }
+        $p = strrev($p);
         if ($l % 2 != 0) {
             $p .= $d;
-        }$l = strlen($p);
+        }
+        $l = strlen($p);
         $di = ($l / 2) - (($l % 2 != 0) ? .5 : 0);
         $p = substr($p, $di, $l) . substr($p, 0, $di);
         $p = base64_encode($p);

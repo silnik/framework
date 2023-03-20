@@ -46,7 +46,7 @@ abstract class Measure
         $to_unit = strtolower(trim($to_unit))[0];
         $from_unit = str_replace($val, '', $strval);
         $from_unit = empty($from_unit) ? 'b' : trim($from_unit)[0];
-        $units = 'kmgtph';  // (k)ilobyte, (m)egabyte, (g)igabyte and so on...
+        $units = 'kmgtph'; // (k)ilobyte, (m)egabyte, (g)igabyte and so on...
 
         // Convert to bytes
         if ($from_unit !== 'b') {

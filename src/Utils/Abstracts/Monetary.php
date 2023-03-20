@@ -63,7 +63,7 @@ abstract class Monetary
 
     public function percentage($pct)
     {
-        $money = round($this->getMoney()->getAmount() + (($this->getMoney()->getAmount() / 100) * ((float)$pct)));
+        $money = round($this->getMoney()->getAmount() + (($this->getMoney()->getAmount() / 100) * ((float) $pct)));
         $money = $this->setMoney($money);
 
         return $this->getMoney();

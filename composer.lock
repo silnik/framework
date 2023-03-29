@@ -282,12 +282,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/dbal.git",
-                "reference": "e7331bcb1c69c983daf4e4e8300e0c30d562b949"
+                "reference": "7ef157430c43e41345205ee934f0409854f018bd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/dbal/zipball/e7331bcb1c69c983daf4e4e8300e0c30d562b949",
-                "reference": "e7331bcb1c69c983daf4e4e8300e0c30d562b949",
+                "url": "https://api.github.com/repos/doctrine/dbal/zipball/7ef157430c43e41345205ee934f0409854f018bd",
+                "reference": "7ef157430c43e41345205ee934f0409854f018bd",
                 "shasum": ""
             },
             "require": {
@@ -387,7 +387,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-03-01T00:29:44+00:00"
+            "time": "2023-03-23T08:48:26+00:00"
         },
         {
             "name": "doctrine/deprecations",
@@ -935,12 +935,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/orm.git",
-                "reference": "4444a29c14e7501189e794e02a10acfd6aa9981b"
+                "reference": "df7a5bc7120adc892fbbd7848cbe37dee1b6885a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/orm/zipball/4444a29c14e7501189e794e02a10acfd6aa9981b",
-                "reference": "4444a29c14e7501189e794e02a10acfd6aa9981b",
+                "url": "https://api.github.com/repos/doctrine/orm/zipball/df7a5bc7120adc892fbbd7848cbe37dee1b6885a",
+                "reference": "df7a5bc7120adc892fbbd7848cbe37dee1b6885a",
                 "shasum": ""
             },
             "require": {
@@ -962,13 +962,13 @@
             "require-dev": {
                 "doctrine/coding-standard": "^11.0",
                 "phpbench/phpbench": "^1.0",
-                "phpstan/phpstan": "1.10.3",
-                "phpunit/phpunit": "^9.6",
+                "phpstan/phpstan": "1.10.6",
+                "phpunit/phpunit": "^10.0.14",
                 "psr/log": "^1 || ^2 || ^3",
                 "squizlabs/php_codesniffer": "3.7.2",
                 "symfony/cache": "^5.4 || ^6.0",
                 "symfony/var-exporter": "^5.4 || ^6.2",
-                "vimeo/psalm": "5.7.7"
+                "vimeo/psalm": "5.8.0"
             },
             "suggest": {
                 "ext-dom": "Provides support for XSD validation for XML mapping files",
@@ -1016,7 +1016,7 @@
                 "issues": "https://github.com/doctrine/orm/issues",
                 "source": "https://github.com/doctrine/orm/tree/3.0.x"
             },
-            "time": "2023-02-28T16:09:23+00:00"
+            "time": "2023-03-25T11:46:36+00:00"
         },
         {
             "name": "doctrine/persistence",
@@ -1118,16 +1118,16 @@
         },
         {
             "name": "filp/whoops",
-            "version": "2.14.6",
+            "version": "2.15.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filp/whoops.git",
-                "reference": "f7948baaa0330277c729714910336383286305da"
+                "reference": "e864ac957acd66e1565f25efda61e37791a5db0b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/filp/whoops/zipball/f7948baaa0330277c729714910336383286305da",
-                "reference": "f7948baaa0330277c729714910336383286305da",
+                "url": "https://api.github.com/repos/filp/whoops/zipball/e864ac957acd66e1565f25efda61e37791a5db0b",
+                "reference": "e864ac957acd66e1565f25efda61e37791a5db0b",
                 "shasum": ""
             },
             "require": {
@@ -1177,7 +1177,7 @@
             ],
             "support": {
                 "issues": "https://github.com/filp/whoops/issues",
-                "source": "https://github.com/filp/whoops/tree/2.14.6"
+                "source": "https://github.com/filp/whoops/tree/2.15.1"
             },
             "funding": [
                 {
@@ -1185,20 +1185,20 @@
                     "type": "github"
                 }
             ],
-            "time": "2022-11-02T16:23:29+00:00"
+            "time": "2023-03-06T18:09:13+00:00"
         },
         {
             "name": "laminas/laminas-hydrator",
-            "version": "4.12.0",
+            "version": "4.13.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laminas/laminas-hydrator.git",
-                "reference": "78fa8f8a29a2866b1fccdf1b0c260557b6bb595e"
+                "reference": "de6da92da20873d569532adec94afa7285f21157"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laminas/laminas-hydrator/zipball/78fa8f8a29a2866b1fccdf1b0c260557b6bb595e",
-                "reference": "78fa8f8a29a2866b1fccdf1b0c260557b6bb595e",
+                "url": "https://api.github.com/repos/laminas/laminas-hydrator/zipball/de6da92da20873d569532adec94afa7285f21157",
+                "reference": "de6da92da20873d569532adec94afa7285f21157",
                 "shasum": ""
             },
             "require": {
@@ -1211,15 +1211,15 @@
                 "zendframework/zend-hydrator": "*"
             },
             "require-dev": {
-                "laminas/laminas-coding-standard": "~2.4.0",
-                "laminas/laminas-eventmanager": "^3.6",
+                "laminas/laminas-coding-standard": "~2.5.0",
+                "laminas/laminas-eventmanager": "^3.10",
                 "laminas/laminas-modulemanager": "^2.14.0",
                 "laminas/laminas-serializer": "^2.14.0",
-                "laminas/laminas-servicemanager": "^3.19",
-                "phpbench/phpbench": "^1.2.7",
-                "phpunit/phpunit": "^9.5.26",
-                "psalm/plugin-phpunit": "^0.18.0",
-                "vimeo/psalm": "^5.0"
+                "laminas/laminas-servicemanager": "^3.20",
+                "phpbench/phpbench": "^1.2.8",
+                "phpunit/phpunit": "^9.5.28",
+                "psalm/plugin-phpunit": "^0.18.4",
+                "vimeo/psalm": "^5.6"
             },
             "suggest": {
                 "laminas/laminas-eventmanager": "^3.2, to support aggregate hydrator usage",
@@ -1262,34 +1262,34 @@
                     "type": "community_bridge"
                 }
             ],
-            "time": "2022-12-21T04:00:01+00:00"
+            "time": "2023-03-19T20:05:31+00:00"
         },
         {
             "name": "laminas/laminas-stdlib",
-            "version": "3.16.1",
+            "version": "3.17.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laminas/laminas-stdlib.git",
-                "reference": "f4f773641807c7ccee59b758bfe4ac4ba33ecb17"
+                "reference": "dd35c868075bad80b6718959740913e178eb4274"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laminas/laminas-stdlib/zipball/f4f773641807c7ccee59b758bfe4ac4ba33ecb17",
-                "reference": "f4f773641807c7ccee59b758bfe4ac4ba33ecb17",
+                "url": "https://api.github.com/repos/laminas/laminas-stdlib/zipball/dd35c868075bad80b6718959740913e178eb4274",
+                "reference": "dd35c868075bad80b6718959740913e178eb4274",
                 "shasum": ""
             },
             "require": {
-                "php": "~8.0.0 || ~8.1.0 || ~8.2.0"
+                "php": "~8.1.0 || ~8.2.0"
             },
             "conflict": {
                 "zendframework/zend-stdlib": "*"
             },
             "require-dev": {
-                "laminas/laminas-coding-standard": "^2.4.0",
-                "phpbench/phpbench": "^1.2.7",
-                "phpunit/phpunit": "^9.5.26",
-                "psalm/plugin-phpunit": "^0.18.0",
-                "vimeo/psalm": "^5.0.0"
+                "laminas/laminas-coding-standard": "^2.5",
+                "phpbench/phpbench": "^1.2.9",
+                "phpunit/phpunit": "^10.0.16",
+                "psalm/plugin-phpunit": "^0.18.4",
+                "vimeo/psalm": "^5.8"
             },
             "type": "library",
             "autoload": {
@@ -1321,7 +1321,7 @@
                     "type": "community_bridge"
                 }
             ],
-            "time": "2022-12-03T18:48:01+00:00"
+            "time": "2023-03-20T13:51:37+00:00"
         },
         {
             "name": "moneyphp/money",
@@ -2541,16 +2541,16 @@
         },
         {
             "name": "verot/class.upload.php",
-            "version": "2.1.3",
+            "version": "2.1.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/verot/class.upload.php.git",
-                "reference": "3c0ca9489d3662e9cccc597aedf70bac7dcca805"
+                "reference": "882ae1158d594bef1a529a62b6b68833df9ea818"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/verot/class.upload.php/zipball/3c0ca9489d3662e9cccc597aedf70bac7dcca805",
-                "reference": "3c0ca9489d3662e9cccc597aedf70bac7dcca805",
+                "url": "https://api.github.com/repos/verot/class.upload.php/zipball/882ae1158d594bef1a529a62b6b68833df9ea818",
+                "reference": "882ae1158d594bef1a529a62b6b68833df9ea818",
                 "shasum": ""
             },
             "require": {
@@ -2581,9 +2581,9 @@
             "support": {
                 "email": "colin@verot.net",
                 "issues": "https://github.com/verot/class.upload.php/issues",
-                "source": "https://github.com/verot/class.upload.php/tree/2.1.3"
+                "source": "https://github.com/verot/class.upload.php/tree/2.1.4"
             },
-            "time": "2022-08-24T14:22:58+00:00"
+            "time": "2022-12-09T09:22:11+00:00"
         },
         {
             "name": "webmozart/assert",

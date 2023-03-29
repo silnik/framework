@@ -9,6 +9,7 @@ class Http
     private $get = [];
     private $body = [];
     private $params = null;
+    private $ebableOptions = [];
     private $method = 'GET';
 
     public function __construct()
@@ -42,23 +43,38 @@ class Http
     }
     public function isGET()
     {
-        return ($this->method == 'GET');
+        return ($this->method === 'GET');
     }
     public function isPOST()
     {
-        return ($this->method == 'POST');
+        return ($this->method === 'POST');
     }
     public function isPUT()
     {
-        return ($this->method == 'PUT');
+        return ($this->method === 'PUT');
     }
     public function isPATCH()
     {
-        return ($this->method == 'PATCH');
+        return ($this->method === 'PATCH');
     }
     public function isDELETE()
     {
-        return ($this->method == 'DELETE');
+        return ($this->method === 'DELETE');
+    }
+    public function isOPTIONS()
+    {
+        return ($this->method === 'OPTIONS');
+    }
+
+    public function setOption($method, $use)
+    {
+        $this->ebableOptions[$method] = $use;
+        return $this;
+    }
+
+    public function getOptions()
+    {
+        return $this->ebableOptions;
     }
 
     /**
@@ -131,9 +147,9 @@ class Http
                 }
             }
         }
-
         return $get;
     }
+
     public function getArray($k = null, $pos = 0)
     {
         if (!is_null($k) && is_array($this->get($k)) && isset($this->get($k)[$pos])) {
@@ -142,6 +158,7 @@ class Http
             return null;
         }
     }
+
     public function get($k = null, $v = null)
     {
         if (isset($k) && isset($v)) {
@@ -164,12 +181,13 @@ class Http
         try {
             $postJson = json_decode(file_get_contents('php://input'), true);
         } catch (\JsonException $exception) {
-            throw new \InvalidArgumentException('Json inválido');
+            throw new \InvalidArgumentException('Invalid Json');
         }
         if (is_array($postJson) && count($postJson) > 0) {
             return $postJson;
         }
     }
+
     public function data($k = null, $v = null)
     {
         if (!is_null($k) && !is_null($v)) {

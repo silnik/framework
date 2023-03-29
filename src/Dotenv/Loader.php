@@ -13,7 +13,7 @@ class Loader
 
             'ACCESS_ORIGIN' => '*',
             'ACCESS_HEADERS' => 'Origin, Content-Type, Accept, Authorization, Cache-Control',
-            'ACCESS_METHODS' => 'POST, PUT, GET, PATCH, DELETE',
+            'ACCESS_METHODS' => 'GET,PUT,POST,DELETE,OPTIONS',
 
             'DB_DRIVER' => 'pdo_mysql',
             'DB_PORT' => '3306',

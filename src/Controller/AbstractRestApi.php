@@ -170,4 +170,5 @@ abstract class AbstractRestApi
     {
         (\Silnik\Logs\LogLoad::getInstance())->register($recordsLoadPage);
     }
+
 }

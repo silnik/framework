@@ -6,6 +6,7 @@ namespace Silnik\Router;
 
 use Silnik\Uri;
 use Silnik\Route;
+use Silnik\Http;
 
 class Router
 {
@@ -30,10 +31,10 @@ class Router
                         $comment = '';
                         if ($call->getDocComment() != false) {
                             $comment = preg_match_all(
-                            pattern: "#([a-zA-Z]+\s*[a-zA-Z0-9, ()_].*)#",
-                            subject: $call->getDocComment(),
-                            matches: $matches,
-                            flags: PREG_PATTERN_ORDER
+                                pattern: "#([a-zA-Z]+\s*[a-zA-Z0-9, ()_].*)#",
+                                subject: $call->getDocComment(),
+                                matches: $matches,
+                                flags: PREG_PATTERN_ORDER
                             );
                             $comment = $matches[0][0];
                         }
@@ -47,8 +48,8 @@ class Router
                                 preg_match_all("'{(.*?)}'si", $route[0], $match);
                                 foreach ($match[1] as $val) {
                                     $p = $uri->prevSlice(
-                                    ref: '{' . $val . '}',
-                                    uri: $route[0]
+                                        ref: '{' . $val . '}',
+                                        uri: $route[0]
                                     );
                                     if ($p != false) {
                                         $params[$p] = '{' . $val . '}';
@@ -77,81 +78,104 @@ class Router
         return $this->routes;
     }
 
-    public function resolve(string $requestUri, string $requestMethod)
+    public function searchAction(string $requestUri): void
     {
-        $combinationStrength = 0;
+        $strength = 0;
         $uri = Uri::getInstance();
         $baseHref = rtrim(string: $uri->getBaseHref(), characters: '/');
-        if (isset($this->routes[$requestMethod])) {
-            foreach ($this->routes[$requestMethod] as $key => $value) {
-                $s = mb_strpos(
-                haystack: $baseHref . $requestUri,
-                needle: $baseHref . $key
-                );
-                if ($s !== false && $combinationStrength <= (int) strlen($baseHref . $key)) {
-                    $combinationStrength = (int) strlen($baseHref . $key);
-                    $action = $this->routes[$requestMethod][$key] ?? null;
-                }
-            }
-            if (isset($action)) {
-                $method = $action['method'];
-                $params = $action['params'];
 
-                \Silnik\Logs\LogLoad::setInstance(
-                filename: PATH_LOG . '/loadpage.json', namespace
-                    : $action['namespace'],
-                method: $action['method'],
-                actionUri: $action['uri'],
-                methodHttp: $requestMethod
-                );
-                $controller = new $action['namespace'];
-                if (
-                    !empty($method) && method_exists(
-                    object_or_class: $controller,
-                    method: $method
-                    ) && is_callable(value: [$controller, $method])
-                ) {
-                    if (is_array(value: $params) && count(value: $params) > 0) {
-                        $idSender = null;
-                        $paramsSender = [];
-                        foreach ($params as $k => $v) {
-                            if ($v == '{id}') {
-                                $idSender = (int) $uri->nextSlice(ref: $k);
-                            } else {
-                                $paramsSender[$k] = $uri->nextSlice(ref: $k);
-                            }
-                        }
-                        if (!is_null(value: $idSender)) {
-                            if (!empty($paramsSender)) {
-                                $controller->$method($idSender, $paramsSender);
-                            } else {
-                                $controller->$method($idSender);
-                            }
-                        } else {
-                            if (!empty($paramsSender)) {
-                                $controller->$method($paramsSender);
-                            } else {
-                                $controller->$method();
-                            }
-                        }
+        $action = [];
+        foreach ($this->routes as $method => $value) {
+            if (Http::getInstance()->isOPTIONS() || $method === Http::getInstance()->method()) {
+                foreach ($value as $uri => $v) {
+                    $uriNoSlash = rtrim(
+                        string: $uri,
+                        characters: '/'
+                    );
+                    $s = mb_strpos(
+                        needle: $uriNoSlash,
+                        haystack: $requestUri
+                    );
+
+                    if ($s !== false) {
+                        Http::getInstance()->setOption($method, true);
+                        $m = similar_text($requestUri, $uri, $perc);
                     } else {
-                        $controller->$method();
+                        $perc = 0;
                     }
-                } elseif (
-                    method_exists(
-                    object_or_class: $controller,
-                    method: 'show'
-                    ) && is_callable(
-                    value: [$controller, 'show']
-                    )
-                ) {
-                    $method->show();
+                    if ($s !== false && $strength < $perc) {
+                        $strength = $perc;
+                        $action = $this->routes[$method][$uri] ?? null;
+                    }
                 }
-                return $action;
             }
         }
-        $this->pageError(code: 404, requestMethod: $requestMethod);
+        Http::getInstance()->setOption('OPTIONS', true);
+        $this->resolve($action);
     }
+
+    public function resolve(array|null $action)
+    {
+        $uri = Uri::getInstance();
+        if (is_array($action) && isset($action['method'])) {
+            $method = $action['method'];
+            $params = $action['params'];
+
+            \Silnik\Logs\LogLoad::setInstance(
+            filename: PATH_LOG . '/loadpage.json', namespace: $action['namespace'], method: $action['method'], actionUri: $action['uri'], methodHttp: $method
+            );
+            $controller = new $action['namespace'];
+            if (Http::getInstance()->isOPTIONS()) {
+                header('HTTP/1.1 200 OK');
+                die();
+            }
+            if (
+                !empty($method) && method_exists(
+                    object_or_class: $controller,
+                    method: $method
+                ) && is_callable(value: [$controller, $method])
+            ) {
+                if (is_array(value: $params) && count(value: $params) > 0) {
+                    $idSender = null;
+                    $paramsSender = [];
+                    foreach ($params as $k => $v) {
+                        if ($v == '{id}') {
+                            $idSender = (int) $uri->nextSlice(ref: $k);
+                        } else {
+                            $paramsSender[$k] = $uri->nextSlice(ref: $k);
+                        }
+                    }
+                    if (!is_null(value: $idSender)) {
+                        if (!empty($paramsSender)) {
+                            $controller->$method($idSender, $paramsSender);
+                        } else {
+                            $controller->$method($idSender);
+                        }
+                    } else {
+                        if (!empty($paramsSender)) {
+                            $controller->$method($paramsSender);
+                        } else {
+                            $controller->$method();
+                        }
+                    }
+                } else {
+                    $controller->$method();
+                }
+            } elseif (
+                method_exists(
+                    object_or_class: $controller,
+                    method: 'show'
+                ) && is_callable(
+                    value: [$controller, 'show']
+                )
+            ) {
+                $method->show();
+            }
+            return $action;
+        }
+        $this->pageError(code: 404, requestMethod: Http::getInstance()->method());
+    }
+
     public function pageError($code, $requestMethod)
     {
         $action['namespace'] = 'Controller\PageError';

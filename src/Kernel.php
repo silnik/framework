@@ -18,10 +18,10 @@ class Kernel
     {
         if (!defined('PATH_ROOT')) {
             define(
-            constant_name: 'PATH_ROOT',
-            value: dirname(
-                path: __FILE__,
-                levels: ($type == 'terminal') ? 5 : 1
+                constant_name: 'PATH_ROOT',
+                value: dirname(
+                    path: __FILE__,
+                    levels: ($type == 'terminal') ? 5 : 1
                 )
             );
         }
@@ -44,40 +44,40 @@ class Kernel
     private static function setDefines()
     {
         define(
-        constant_name: 'UPLOAD_PUBLIC',
-        value: str_replace(
-            search: '/public',
-            replace: '',
-            subject: getenv('PATH_UPLOAD_PUBLIC')
+            constant_name: 'UPLOAD_PUBLIC',
+            value: str_replace(
+                search: '/public',
+                replace: '',
+                subject: getenv('PATH_UPLOAD_PUBLIC')
             )
         );
         define(
-        constant_name: 'PATH_UPLOAD_PUBLIC',
-        value: PATH_ROOT . getenv('PATH_UPLOAD_PUBLIC')
+            constant_name: 'PATH_UPLOAD_PUBLIC',
+            value: PATH_ROOT . getenv('PATH_UPLOAD_PUBLIC')
         );
         define(
-        constant_name: 'PATH_UPLOAD_PRIVARTE',
-        value: PATH_ROOT . getenv('PATH_UPLOAD_PRIVARTE')
+            constant_name: 'PATH_UPLOAD_PRIVARTE',
+            value: PATH_ROOT . getenv('PATH_UPLOAD_PRIVARTE')
         );
         define(
-        constant_name: 'PATH_SESSIONS',
-        value: PATH_ROOT . getenv('PATH_SESSIONS')
+            constant_name: 'PATH_SESSIONS',
+            value: PATH_ROOT . getenv('PATH_SESSIONS')
         );
         define(
-        constant_name: 'PATH_TMP',
-        value: PATH_ROOT . getenv('PATH_TMP')
+            constant_name: 'PATH_TMP',
+            value: PATH_ROOT . getenv('PATH_TMP')
         );
         define(
-        constant_name: 'PATH_LOG',
-        value: PATH_ROOT . getenv('PATH_LOG')
+            constant_name: 'PATH_LOG',
+            value: PATH_ROOT . getenv('PATH_LOG')
         );
         define(
-        constant_name: 'PATH_CACHE',
-        value: PATH_ROOT . getenv('PATH_CACHE')
+            constant_name: 'PATH_CACHE',
+            value: PATH_ROOT . getenv('PATH_CACHE')
         );
         define(
-        constant_name: 'PATH_MIGRATIONS',
-        value: PATH_ROOT . getenv('PATH_MIGRATIONS')
+            constant_name: 'PATH_MIGRATIONS',
+            value: PATH_ROOT . getenv('PATH_MIGRATIONS')
         );
 
         $makeDirectoryENV = [
@@ -92,9 +92,9 @@ class Kernel
         foreach ($makeDirectoryENV as $dir) {
             if (!is_dir(filename: $dir)) {
                 mkdir(
-                directory: $dir,
-                permissions: 0777,
-                recursive: true
+                    directory: $dir,
+                    permissions: 0777,
+                    recursive: true
                 );
             }
         }
@@ -103,10 +103,10 @@ class Kernel
     private function sessions()
     {
         return (
-                    new Sessions(
-                    path: PATH_SESSIONS
-                    )
-                )->start();
+            new Sessions(
+            path: PATH_SESSIONS
+            )
+        )->start();
     }
     private function logs(): ErrorPhp
     {
@@ -137,22 +137,18 @@ class Kernel
         header('Access-Control-Allow-Origin: ' . getenv('ACCESS_ORIGIN'));
         header('Access-Control-Allow-Headers: ' . getenv('ACCESS_HEADERS'));
         header('Access-Control-Allow-Methods: ' . getenv('ACCESS_METHODS'));
-        if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-            header('HTTP/1.1 200 OK');
-            die();
-        }
     }
     private function mount(): void
     {
         // path
         if (
             !preg_match(
-            pattern: '/^' . str_replace(search: '/', replace: '\/', subject: '/') . // INVALID_PATH_RE
+                pattern: '/^' . str_replace(search: '/', replace: '\/', subject: '/') . // INVALID_PATH_RE
                 '(.*?)?' . // pathURI [1]
                 '([^\/?]*\..*)?' . // elemento com "." [2]
                 '(\?.*)?$/', // elemento QS [3]
-            subject: $this->uri->getUri(),
-            matches: $arrayURI
+                subject: $this->uri->getUri(),
+                matches: $arrayURI
             )
         ) {
             header(header: 'Location: ' . $this->uri->getBaseHref());
@@ -160,21 +156,18 @@ class Kernel
         } else {
             $router = new \Silnik\Router\Router();
             $router->registerRoutesFromControllerAttributes(
-            controllers: require_once PATH_ROOT . '/src/routes.php'
+                controllers: require_once PATH_ROOT . '/src/routes.php'
             );
             try {
-                $router->resolve(
-                requestUri: $this->uri->getUri(),
-                requestMethod: $this->http->method()
-                );
+                $router->searchAction($this->uri->getUri());
             } catch (\Throwable $th) {
                 ErrorPhp::registerError(
                 message: $th->getMessage(),
                 level: 'ERROR'
                 );
                 $router->pageError(
-                code: 500,
-                requestMethod: $this->http->method()
+                    code: 500,
+                    requestMethod: $this->http->method()
                 );
             }
         }
@@ -195,7 +188,7 @@ class Kernel
             \Doctrine\ORM\Tools\Console\ConsoleRunner::addCommands(
             cli: $application,
             entityManagerProvider: new \Doctrine\ORM\Tools\Console\EntityManagerProvider\SingleManagerProvider(
-                entityManager: $entityManager
+                    entityManager: $entityManager
                 )
             );
             $dependencyFactory = \Doctrine\Migrations\DependencyFactory::fromEntityManager(
@@ -204,7 +197,7 @@ class Kernel
             );
             $migrationCommands = \Silnik\ORM\Migrations\Migrations::commands();
             $application->addCommands(
-            commands: $migrationCommands(
+                commands: $migrationCommands(
                 dependencyFactory: $dependencyFactory
                 )
             );
@@ -226,10 +219,10 @@ class Kernel
     {
         if (!defined(constant_name: 'PATH_ROOT')) {
             define(
-            constant_name: 'PATH_ROOT',
-            value: dirname(
-                path: __FILE__,
-                levels: 5
+                constant_name: 'PATH_ROOT',
+                value: dirname(
+                    path: __FILE__,
+                    levels: 5
                 )
             );
         }
@@ -238,15 +231,15 @@ class Kernel
         $composer = json_decode(json: file_get_contents(PATH_ROOT . '/composer.json'), associative: true);
         $hash = substr(string: md5(string: (string) time()), offset: 0, length: 7);
         file_put_contents(
-        filename: PATH_LOG . '/deploy.log',
-        data: json_encode(
-            value: [
+            filename: PATH_LOG . '/deploy.log',
+            data: json_encode(
+                value: [
                     'name' => $composer['name'],
                     'version' => $composer['version'],
                     'hash' => $hash,
                     'generatedTime' => date(format: 'Y-m-d H:i:s'),
                 ],
-            flags: JSON_PRETTY_PRINT
+                flags: JSON_PRETTY_PRINT
             )
         );
     }

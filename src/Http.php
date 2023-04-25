@@ -103,6 +103,7 @@ class Http
                 'string' => (string) $ret,
                 'bool' => (bool) $ret,
                 'float' => (float) $ret,
+                'money' => number_format($ret, 2, '.'),
                 'array' => (array) $ret,
                 default => trim($ret)
             };
@@ -169,7 +170,6 @@ class Http
             if (!isset($this->get[$k]) || is_null($this->get[$k])) {
                 return null;
             }
-
             return $this->get[$k];
         } else {
             return $this->get;

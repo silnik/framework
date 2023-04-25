@@ -27,6 +27,12 @@ abstract class AbstractEntity
     protected $updatedat;
 
     /**
+     * @var \DateTime|null
+     */
+    #[ORM\Column(name: 'softDelete', type: 'datetime', nullable: true)]
+    private $softdelete;
+
+    /**
      * Get the value of createdat
      */
     public function getCreatedat()
@@ -66,6 +72,24 @@ abstract class AbstractEntity
     public function setUpdatedat($updatedat): self
     {
         $this->updatedat = $updatedat;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of softdelete
+     */
+    public function getSoftdelete()
+    {
+        return $this->softdelete;
+    }
+
+    /**
+     * Set the value of softdelete
+     */
+    public function setSoftdelete($softdelete): self
+    {
+        $this->softdelete = $softdelete;
 
         return $this;
     }

@@ -103,7 +103,7 @@ class Http
                 'string' => (string) $ret,
                 'bool' => (bool) $ret,
                 'float' => (float) $ret,
-                'money' => number_format($ret, 2, '.'),
+                'money' => number_format(str_replace(',', '', $ret), 2, '.', ''),
                 'array' => (array) $ret,
                 default => trim($ret)
             };

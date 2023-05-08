@@ -4,11 +4,13 @@ namespace Silnik\Utils\Abstracts;
 
 abstract class Mask
 {
-    public const TELEFONE = '8 OU 9 DIGITOS';
-    public const DOCUMENTO = 'CPF OU CNPJ';
+    public const DOCUMENTO = 'CPF OR CNPJ';
     public const CPF = '###.###.###-##';
     public const CNPJ = '##.###.###/####-##';
-    public const CEP = '##.###-###';
+    public const CEP = '#####-###';
+    public const TELEFONE = '13 OU 14 DIGITOS';
+    public const TELEFONE_MOVEL = '+### ## #####-####';
+    public const TELEFONE_FIXO = '+### ## ####-####';
     public const MAC = '##:##:##:##:##:##';
 
     /**
@@ -23,9 +25,11 @@ abstract class Mask
         if (empty($txt) || empty($mascara)) {
             return false;
         } elseif ($mascara == self::TELEFONE) {
-            $mascara = (strlen($txt) == 10 ? '(##)####-####' : '(##)#####-####');
+            $txt = preg_replace("/[^0-9]/", "", $txt);
+            $mascara = (strlen($txt) === 14 ? MASK::TELEFONE_MOVEL : MASK::TELEFONE_FIXO);
         } elseif ($mascara == self::DOCUMENTO) {
-            $mascara = (strlen($txt) == 14 ? Mask::CNPJ : (strlen($txt) == 11 ? Mask::CPF : ''));
+            $txt = preg_replace("/[^0-9]/", "", $txt);
+            $mascara = (strlen($txt) === 14 ? Mask::CNPJ : (strlen($txt) == 11 ? Mask::CPF : ''));
         }
 
         return Mask::MaskFactory($txt, $mascara);
@@ -53,7 +57,6 @@ abstract class Mask
                 $pos = strpos($mascara, '#');
                 $mascara[$pos] = $string[$i];
             }
-
             return $mascara;
         }
     }

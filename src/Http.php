@@ -31,8 +31,8 @@ class Http
     }
     public function header($k)
     {
-        if (isset($this->headers[$k])) {
-            return $this->headers[$k];
+        if (isset($k) && !empty($k)) {
+            return isset($this->headers[$k]) ? $this->headers[$k] : '';
         } else {
             return $this->headers;
         }

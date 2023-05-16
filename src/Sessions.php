@@ -22,11 +22,10 @@ class Sessions
         ini_set('session.cookie_secure', 0);
         ini_set('session.use_strict_mode', 0);
         session_save_path($this->path);
-        $auth = strtolower(substr(Http::getInstance()->header('Authorization'), -26));
-        if (!empty($auth) && session_status() !== PHP_SESSION_ACTIVE) {
-            session_id($auth);
+        if (!empty(Http::getInstance()->header('Authorization')) && strlen(Http::getInstance()->header('Authorization')) > 32) {
+            session_id(substr(strtolower(preg_replace('/[^a-zA-Z0-9]/', '', Http::getInstance()->header('Authorization'))), -32));
             session_start();
-        } else {
+        } else if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
         }
         $this->limitRequest();

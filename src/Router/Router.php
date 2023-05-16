@@ -43,7 +43,7 @@ class Router
                             $url = $route[0];
                             $params = [];
                             if (mb_strpos($url, '{') !== false) {
-                                $url = explode('{', $url)[0];
+                                // $url = explode('{', $url)[0];
 
                                 preg_match_all("'{(.*?)}'si", $route[0], $match);
                                 foreach ($match[1] as $val) {
@@ -78,28 +78,42 @@ class Router
         return $this->routes;
     }
 
+    public function getVarByParamers($moldel, $uri)
+    {
+        $a1 = explode('/', $moldel);
+        $a2 = explode('/', $uri);
+
+        $tmp = '';
+        foreach ($a1 as $k => $v) {
+            if (substr($v, 0, 1) === '{' && substr($v, -1) === '}' && isset($a2[$k])) {
+                $add = (int) $a2[$k];
+            } else {
+                $add = $v;
+            }
+            $tmp .= '/' . $add;
+        }
+        return substr($tmp, 1);
+    }
+
     public function searchAction(string $requestUri): void
     {
         $strength = 0;
         $uri = Uri::getInstance();
-        $baseHref = rtrim(string: $uri->getBaseHref(), characters: '/');
 
         $action = [];
         foreach ($this->routes as $method => $value) {
             if (Http::getInstance()->isOPTIONS() || $method === Http::getInstance()->method()) {
                 foreach ($value as $uri => $v) {
-                    $uriNoSlash = rtrim(
-                        string: $uri,
-                        characters: '/'
-                    );
+
+                    $repalceVars = $this->getVarByParamers($v['uri'], $requestUri);
                     $s = mb_strpos(
-                        needle: $uriNoSlash,
+                        needle: $repalceVars,
                         haystack: $requestUri
                     );
 
                     if ($s !== false) {
                         Http::getInstance()->setOption($method, true);
-                        $m = similar_text($requestUri, $uri, $perc);
+                        similar_text($requestUri, $repalceVars, $perc);
                     } else {
                         $perc = 0;
                     }
@@ -122,7 +136,7 @@ class Router
             $params = $action['params'];
 
             \Silnik\Logs\LogLoad::setInstance(
-            filename: PATH_LOG . '/loadpage.json', namespace: $action['namespace'], method: $action['method'], actionUri: $action['uri'], methodHttp: $method
+                filename: PATH_LOG . '/loadpage.json', namespace: $action['namespace'], method: $action['method'], actionUri: $action['uri'], methodHttp: $method
             );
             $controller = new $action['namespace'];
             if (Http::getInstance()->isOPTIONS()) {
@@ -184,11 +198,11 @@ class Router
         $action['params'] = '';
 
         \Silnik\Logs\LogLoad::setInstance(
-        filename: PATH_LOG . '/loadpage.json', namespace
+            filename: PATH_LOG . '/loadpage.json', namespace
             : $action['namespace'],
-        method: 'show',
-        actionUri: $action['actionUri'],
-        methodHttp: $requestMethod
+            method: 'show',
+            actionUri: $action['actionUri'],
+            methodHttp: $requestMethod
         );
 
         $controller = new $action['namespace'];

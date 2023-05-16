@@ -34,8 +34,8 @@ class Kernel
         $this->setHeaders();
         $this->uri = Uri::getInstance();
         $this->http = Http::getInstance();
-        $this->sessions();
         $this->logs();
+        $this->sessions();
         $this->cache();
         $this->database();
         $this->mount();
@@ -162,8 +162,8 @@ class Kernel
                 $router->searchAction($this->uri->getUri());
             } catch (\Throwable $th) {
                 ErrorPhp::registerError(
-                message: $th->getMessage(),
-                level: 'ERROR'
+                    message: $th->getMessage(),
+                    level: 'ERROR'
                 );
                 $router->pageError(
                     code: 500,
@@ -186,19 +186,19 @@ class Kernel
 
         try {
             \Doctrine\ORM\Tools\Console\ConsoleRunner::addCommands(
-            cli: $application,
-            entityManagerProvider: new \Doctrine\ORM\Tools\Console\EntityManagerProvider\SingleManagerProvider(
+                cli: $application,
+                entityManagerProvider: new \Doctrine\ORM\Tools\Console\EntityManagerProvider\SingleManagerProvider(
                     entityManager: $entityManager
                 )
             );
             $dependencyFactory = \Doctrine\Migrations\DependencyFactory::fromEntityManager(
-            configurationLoader: \Silnik\ORM\Migrations\Migrations::config(),
-            emLoader: new \Doctrine\Migrations\Configuration\EntityManager\ExistingEntityManager(entityManager: $entityManager)
+                configurationLoader: \Silnik\ORM\Migrations\Migrations::config(),
+                emLoader: new \Doctrine\Migrations\Configuration\EntityManager\ExistingEntityManager(entityManager: $entityManager)
             );
             $migrationCommands = \Silnik\ORM\Migrations\Migrations::commands();
             $application->addCommands(
                 commands: $migrationCommands(
-                dependencyFactory: $dependencyFactory
+                    dependencyFactory: $dependencyFactory
                 )
             );
         } catch (\Throwable $th) {

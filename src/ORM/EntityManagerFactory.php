@@ -15,8 +15,8 @@ class EntityManagerFactory
     {
         if (
             !empty(getenv('DB_USERNAME')) &&
-            !empty(getenv('DB_USERNAME')) &&
-            !empty(getenv('DB_USERNAME'))
+            !empty(getenv('DB_PASSWORD')) &&
+            !empty(getenv('DB_DATABASE'))
         ) {
             $this->connection = [
                 'driver' => getenv('DB_DRIVER'),
@@ -34,14 +34,15 @@ class EntityManagerFactory
             ];
         }
         if ($this->connection) {
-            $isDevMode = (getenv('APP_ENV') != 'production');
+            $isDevMode = (getenv('APP_ENV') !== 'production');
             $config = ORMSetup::createAttributeMetadataConfiguration(
                 [dirname(__DIR__, 5) . '/src/Entity'],
                 $isDevMode,
                 null,
                 null
             );
-            $config->setProxyDir(dirname(__DIR__, 5) . '/src/DoctrineProxies');
+            $config->setProxyDir(dirname(__DIR__, 5) . getenv('PATH_PROXIES'));
+            $config->setAutoGenerateProxyClasses(\Doctrine\ORM\Proxy\ProxyFactory::AUTOGENERATE_FILE_NOT_EXISTS);
 
             return new EntityManager(
                 DriverManager::getConnection($this->connection, $config),

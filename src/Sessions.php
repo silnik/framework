@@ -2,13 +2,15 @@
 
 namespace Silnik;
 
+use Silnik\Http;
+
 class Sessions
 {
     public function __construct(
         private $path = '',
-        private $expiteFullSessDays = 30,
+        private $expiteFullSessDays = 5,
         private $expiteEmptySessDays = 1,
-        private $limitInSeconds = 5,
+        private $limitInSeconds = 3,
         private $maxRequest = 10
     ) {
     }
@@ -17,56 +19,38 @@ class Sessions
         session_cache_limiter('private');
         session_cache_expire($this->expiteFullSessDays * 24 * 60);
         ini_set('session.gc_maxlifetime', ($this->expiteFullSessDays * 24 * 60 * 60));
-        ini_set('session.cookie_secure', 1);
-
+        ini_set('session.cookie_secure', 0);
+        ini_set('session.use_strict_mode', 0);
         session_save_path($this->path);
-        if (session_status() !== PHP_SESSION_ACTIVE) {
+        $auth = strtolower(substr(Http::getInstance()->header('Authorization'), -26));
+        if (!empty($auth) && session_status() !== PHP_SESSION_ACTIVE) {
+            session_id($auth);
             session_start();
-            $this->limitRequest();
+        } else {
+            session_start();
         }
+        $this->limitRequest();
         ob_start();
     }
     public function limitRequest()
     {
-        // Create our requests array in session scope if it does not yet exist
-        if (!isset($_SESSION['requests'])) {
-            $_SESSION['requests'] = [];
+        if (!isset($_SESSION['REQUEST'])) {
+            $_SESSION['REQUEST'] = [
+                'LAST' => time(),
+                'CONT' => 1
+            ];
         }
-
-        // Create a shortcut variable for this array (just for shorter & faster code)
-        $requests = $_SESSION['requests'];
-
-        $countRecent = 0;
-        $repeat = false;
-        foreach ($requests as $request) {
-            // See if the current request was made before
-            if ($request['session_id'] == session_id()) {
-                $repeat = true;
-            }
-            // Count (only) new requests made in last minute
-            if ($request['time'] >= time() - $this->limitInSeconds) {
-                $countRecent++;
-            }
+        $fast_request_check = ($_SESSION['REQUEST']['LAST'] > time() - $this->limitInSeconds);
+        if ($fast_request_check && ($_SESSION['REQUEST']['CONT'] < $this->maxRequest)) {
+            $_SESSION['REQUEST']['CONT']++;
+        } elseif ($fast_request_check) {
+            sleep(1);
+        } else {
+            $_SESSION['REQUEST'] = [
+                'LAST' => time(),
+                'CONT' => 1
+            ];
         }
-
-        // Only if this is a new request...
-        if (!$repeat) {
-            // Check if limit is crossed.
-            // NB: Refused requests are not added to the log.
-            if ($countRecent >= $this->maxRequest) {
-                http_response_code(429);
-                echo json_encode('Too many requests in a short time');
-                exit;
-            }
-            // Add current request to the log.
-            $countRecent++;
-            $requests[] = ['time' => time(), 'session_id' => session_id()];
-        }
-
-        // Debugging code, can be removed later:
-        //echo  count($requests) . " unique ID requests, of which $countRecent in last minute.<br>";
-
-        // if execution gets here, then proceed with file content lookup as you have it.
     }
 
     public function clearEmptySessions()

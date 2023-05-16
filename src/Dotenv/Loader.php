@@ -29,6 +29,7 @@ class Loader
             'PATH_TMP' => '/.storage/tmp',
             'PATH_LOG' => '/.storage/log',
             'PATH_MIGRATIONS' => '/src/Migrations',
+            'PATH_PROXIES' => '/.storage/DoctrineProxies',
             'PATH_DATABASE' => '',
             'PATH_CACHE' => '/.storage/cache',
 

@@ -156,12 +156,17 @@ abstract class AbstractRestApi
     public function dumpJsonError(\Throwable $th)
     {
         if ($th->getCode() > 0) {
-            $this->status($th->getCode())->response('message', $th->getMessage())->dumpJson();
+            if (empty($th->getMessage())) {
+                $this->defaultMessage(Http::getInstance()->method(), $th->getCode());
+            } else {
+                $this->response('message', $th->getMessage());
+            }
+            $this->status($th->getCode())->dumpJson();
         } else {
             \Silnik\Logs\ErrorPhp::registerError(
-            message: $th->getMessage(),
-            level: 'ERROR',
-            debug: debug_backtrace()
+                message: $th->getMessage(),
+                level: 'ERROR',
+                debug: debug_backtrace()
             );
             $this->status(500)->response('message', 'Internal Server Error')->dumpJson();
         }

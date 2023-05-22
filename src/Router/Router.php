@@ -86,7 +86,11 @@ class Router
         $tmp = '';
         foreach ($a1 as $k => $v) {
             if (substr($v, 0, 1) === '{' && substr($v, -1) === '}' && isset($a2[$k])) {
-                $add = (int) $a2[$k];
+                if (strtolower(substr($v, -3, -1)) == 'id') {
+                    $add = (int) $a2[$k];
+                } else {
+                    $add = $a2[$k];
+                }
             } else {
                 $add = $v;
             }
@@ -104,21 +108,28 @@ class Router
         foreach ($this->routes as $method => $value) {
             if (Http::getInstance()->isOPTIONS() || $method === Http::getInstance()->method()) {
                 foreach ($value as $uri => $v) {
-
                     $repalceVars = $this->getVarByParamers($v['uri'], $requestUri);
-                    $s = mb_strpos(
+                    $s1 = mb_strpos(
                         needle: $repalceVars,
                         haystack: $requestUri
                     );
+                    $s2 = mb_strpos(
+                        needle: $requestUri,
+                        haystack: $repalceVars
+                    );
 
-                    if ($s !== false) {
+                    if ($s1 !== false || $s2 !== false) {
                         Http::getInstance()->setOption($method, true);
-                        similar_text($requestUri, $repalceVars, $perc);
+                        similar_text($requestUri, $repalceVars, $perc1);
+                        $coincidence = ($perc1);
+                        if ($uri === $requestUri) {
+                            $coincidence += 10;
+                        }
                     } else {
-                        $perc = 0;
+                        $coincidence = 0;
                     }
-                    if ($s !== false && $strength < $perc) {
-                        $strength = $perc;
+                    if (($s1 !== false || $s2 !== false) && $strength < $coincidence) {
+                        $strength = $coincidence;
                         $action = $this->routes[$method][$uri] ?? null;
                     }
                 }

@@ -10,4 +10,6 @@ abstract class Types
     final public const FLOAT = 'float';
     final public const MONEY = 'money';
     final public const ARRAY = 'array';
+    final public const DATE = 'date';
+    final public const DATETIME = 'datetime';
 }

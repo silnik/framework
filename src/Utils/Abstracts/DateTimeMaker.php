@@ -348,6 +348,24 @@ abstract class DateTimeMaker
         return $this;
     }
 
+    /**
+     * @param string $date
+     * @param string $format
+     *
+     * @return bool
+     */
+    public static function validate($date, $format = 'Y-m-d'): bool
+    {
+        $dataObj = \DateTime::createFromFormat($format, $date);
+
+        if ($dataObj && $dataObj->format($format) === $date) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
     public function returnMonthBr($length = 0)
     {
         $ret = $this->monthsBR[(int) $this->month()];

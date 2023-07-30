@@ -98,9 +98,20 @@ class Http
                 return null;
             }
 
+            if (
+                ($required === true && ($forceType === 'date' || $forceType === 'datetime')) ||
+                (!empty($ret) && ($forceType === 'date' || $forceType === 'datetime'))
+            ) {
+                if (!\Silnik\Utils\DateTimeMaker::validate($ret['date'], ($forceType == 'datetime' ? 'Y-m-d H:i:s' : 'Y-m-d'))) {
+                    throw new \Exception($params . ' is invalid format ' . ($forceType == 'datetime' ? 'Y-m-d H:i:s' : 'Y-m-d'), 400);
+                }
+            }
+
             return match ($forceType) {
                 'int' => (int) $ret,
                 'string' => (string) $ret,
+                'date' => (string) $ret['date'],
+                'datetime' => (string) $ret['date'],
                 'bool' => (bool) $ret,
                 'float' => (float) $ret,
                 'money' => number_format(str_replace(',', '', $ret), 2, '.', ''),

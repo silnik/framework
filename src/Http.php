@@ -87,7 +87,15 @@ class Http
     {
         $ret = null;
         if (is_string($params)) {
-            $ret = $this->data($params);
+            if (strpos($params, '.') !== false) {
+                $e = explode('.', $params);
+                $ret = $this->dataArray($e[0], $e[1]);
+                if (is_null($ret) && $required === true) {
+                    throw new \Exception($e[0] . ' is required', 400);
+                }
+            } else {
+                $ret = $this->data($params);
+            }
         } elseif (is_array($params)) {
             $ret = $this->data($params);
         }
@@ -102,16 +110,16 @@ class Http
                 ($required === true && ($forceType === 'date' || $forceType === 'datetime')) ||
                 (!empty($ret) && ($forceType === 'date' || $forceType === 'datetime'))
             ) {
-                if (!\Silnik\Utils\DateTimeMaker::validate($ret['date'], ($forceType == 'datetime' ? 'Y-m-d H:i:s' : 'Y-m-d'))) {
-                    throw new \Exception($params . ' is invalid format ' . ($forceType == 'datetime' ? 'Y-m-d H:i:s' : 'Y-m-d'), 400);
+                if (!\Silnik\Utils\DateTimeMaker::validate(substr($ret['date'], 0, ($forceType === 'datetime' ? 19 : 10)), ($forceType === 'datetime' ? 'Y-m-d H:i:s' : 'Y-m-d'))) {
+                    throw new \Exception($params . ' is invalid format ' . ($forceType === 'datetime' ? 'Y-m-d H:i:s' : 'Y-m-d'), 400);
                 }
             }
 
             return match ($forceType) {
                 'int' => (int) $ret,
                 'string' => (string) $ret,
-                'date' => (string) $ret['date'],
-                'datetime' => (string) $ret['date'],
+                'date' => (string) substr($ret['date'], 0, 10),
+                'datetime' => (string) substr($ret['date'], 0, 19),
                 'bool' => (bool) $ret,
                 'float' => (float) $ret,
                 'money' => number_format(str_replace(',', '', $ret), 2, '.', ''),

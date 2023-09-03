@@ -89,7 +89,8 @@ class Http
         if (is_string($params)) {
             if (strpos($params, '.') !== false) {
                 $e = explode('.', $params);
-                $ret = $this->dataArray($e[0], $e[1]);
+                $ret = $this->dataArray($e[0], $e[1], (count($e) > 2 ? $e[2] : null));
+
                 if (is_null($ret) && $required === true) {
                     throw new \Exception($e[0] . ' is required', 400);
                 }
@@ -220,10 +221,12 @@ class Http
         }
     }
 
-    public function dataArray($k = null, $pos = null)
+    public function dataArray($k = null, $pos = null, $pos2 = null)
     {
         if (is_null($pos)) {
             return $this->data($k);
+        } elseif (!is_null($k) && is_array($this->data($k)) && isset($this->data($k)[$pos]) && !is_null($pos2) && isset($this->data($k)[$pos][$pos2])) {
+            return $this->data($k)[$pos][$pos2];
         } elseif (!is_null($k) && is_array($this->data($k)) && isset($this->data($k)[$pos])) {
             return $this->data($k)[$pos];
         } else {

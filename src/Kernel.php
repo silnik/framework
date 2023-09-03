@@ -134,7 +134,7 @@ class Kernel
     }
     private function setHeaders(): void
     {
-        header('Access-Control-Allow-Origin: ' . getenv('ACCESS_ORIGIN'));
+        // header('Access-Control-Allow-Origin: ' . getenv('ACCESS_ORIGIN'));
         header('Access-Control-Allow-Headers: ' . getenv('ACCESS_HEADERS'));
         header('Access-Control-Allow-Methods: ' . getenv('ACCESS_METHODS'));
     }

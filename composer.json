@@ -11,14 +11,14 @@
     },
     "require": {
         "ext-pdo": "*",
-        "doctrine/orm": "3.0.x-dev",
-        "doctrine/dbal": "3.6.x-dev",
-        "symfony/cache": "^6.2",
-        "doctrine/doctrine-laminas-hydrator": "^3.3",
-        "moneyphp/money": "4.1.0",
+        "doctrine/orm": "^3.0.x-dev",
+        "doctrine/dbal": "3.7.x-dev",
+        "symfony/cache": "6.4.x-dev",
+        "doctrine/doctrine-laminas-hydrator": "3.4.x-dev",
+        "doctrine/migrations": "3.7.x-dev",
+        "moneyphp/money": "^4.1.0",
         "verot/class.upload.php": "^2.1",
-        "filp/whoops": "^2.14",
-        "doctrine/migrations": "^3.5"
+        "filp/whoops": "^2.14"
     },
     "autoload": {
         "psr-4": {

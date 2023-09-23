@@ -134,6 +134,7 @@ class Kernel
     }
     private function setHeaders(): void
     {
+
         // header('Access-Control-Allow-Origin: ' . getenv('ACCESS_ORIGIN'));
         header('Access-Control-Allow-Headers: ' . getenv('ACCESS_HEADERS'));
         header('Access-Control-Allow-Methods: ' . getenv('ACCESS_METHODS'));
@@ -146,7 +147,8 @@ class Kernel
                 pattern: '/^' . str_replace(search: '/', replace: '\/', subject: '/') . // INVALID_PATH_RE
                 '(.*?)?' . // pathURI [1]
                 '([^\/?]*\..*)?' . // elemento com "." [2]
-                '(\?.*)?$/', // elemento QS [3]
+                '(\?.*)?$/',
+                // elemento QS [3]
                 subject: $this->uri->getUri(),
                 matches: $arrayURI
             )
@@ -183,7 +185,6 @@ class Kernel
         // ORM & MIGRATIONS
         $entityManagerFactory = new \Silnik\ORM\EntityManagerFactory();
         $entityManager = $entityManagerFactory->getEntityManager();
-
         try {
             \Doctrine\ORM\Tools\Console\ConsoleRunner::addCommands(
                 cli: $application,

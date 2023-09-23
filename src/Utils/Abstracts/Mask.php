@@ -17,17 +17,17 @@ abstract class Mask
      * Adiciona máscara em um texto
      *
      * @param  string   $txt Texto
-     * @param  Mask     $mascara
+     * @param  string   $mascara
      * @return string (Texto com mascara)
      */
     public static function mask($txt = '', string $mascara = '')
     {
         if (empty($txt) || empty($mascara)) {
             return false;
-        } elseif ($mascara == self::TELEFONE) {
+        } elseif ($mascara === self::TELEFONE) {
             $txt = preg_replace("/[^0-9]/", "", $txt);
-            $mascara = (strlen($txt) === 14 ? MASK::TELEFONE_MOVEL : MASK::TELEFONE_FIXO);
-        } elseif ($mascara == self::DOCUMENTO) {
+            $mascara = (strlen($txt) === 14 ? self::TELEFONE_MOVEL : self::TELEFONE_FIXO);
+        } elseif ($mascara === self::DOCUMENTO) {
             $txt = preg_replace("/[^0-9]/", "", $txt);
             $mascara = (strlen($txt) === 14 ? Mask::CNPJ : (strlen($txt) == 11 ? Mask::CPF : ''));
         }

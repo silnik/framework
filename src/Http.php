@@ -68,7 +68,9 @@ class Http
 
     public function setOption($method, $use)
     {
-        $this->ebableOptions[$method] = $use;
+        if ($method) {
+            $this->ebableOptions[$method] = $use;
+        }
         return $this;
     }
 

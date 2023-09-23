@@ -64,7 +64,7 @@ class Router
         }
     }
 
-    public function register(array $requestMethod, string $route, callable |array $action): self
+    public function register(array $requestMethod, string $route, callable|array $action): self
     {
         foreach ($requestMethod as $method) {
             $this->routes[$method][$route] = $action;
@@ -82,7 +82,6 @@ class Router
     {
         $a1 = explode('/', $moldel);
         $a2 = explode('/', $uri);
-
         $tmp = '';
         foreach ($a1 as $k => $v) {
             if (substr($v, 0, 1) === '{' && substr($v, -1) === '}' && isset($a2[$k])) {
@@ -147,7 +146,19 @@ class Router
             $params = $action['params'];
 
             \Silnik\Logs\LogLoad::setInstance(
-                filename: PATH_LOG . '/loadpage.json', namespace: $action['namespace'], method: $action['method'], actionUri: $action['uri'], methodHttp: $method
+                filename: PATH_LOG . '/loadpage.json',
+            namespace
+
+
+
+
+
+
+
+                : $action['namespace'],
+                method: $action['method'],
+                actionUri: $action['uri'],
+                methodHttp: $method
             );
             $controller = new $action['namespace'];
             if (Http::getInstance()->isOPTIONS()) {
@@ -209,7 +220,16 @@ class Router
         $action['params'] = '';
 
         \Silnik\Logs\LogLoad::setInstance(
-            filename: PATH_LOG . '/loadpage.json', namespace
+            filename: PATH_LOG . '/loadpage.json',
+        namespace
+
+
+
+
+
+
+
+
             : $action['namespace'],
             method: 'show',
             actionUri: $action['actionUri'],

@@ -12,8 +12,8 @@ class Loader
             'APP_URL' => 'http://localhost/',
 
             'ACCESS_ORIGIN' => '*',
-            'ACCESS_HEADERS' => 'Origin, Content-Type, Accept, Authorization, Cache-Control',
-            'ACCESS_METHODS' => 'GET,PUT,POST,DELETE,OPTIONS',
+            'ACCESS_HEADERS' => 'Origin, Content-Type, Accept, Authorization, Cache-Control, Custom-Message',
+            'ACCESS_METHODS' => 'GET,PUT,POST,DELETE',
 
             'DB_DRIVER' => 'pdo_mysql',
             'DB_PORT' => '3306',
@@ -34,8 +34,7 @@ class Loader
             'PATH_CACHE' => '/.storage/cache',
 
             'SESSION_LIFETIME' => 120,
-            'PRIVATE_KEY' => md5(string: time()),
-            'CACHE_TWIG' => false,
+            'PRIVATE_KEY' => md5(string: time())
         ];
 
         if (file_exists(filename: PATH_ROOT . $this->env['PATH_LOG'] . '/deploy.log')) {

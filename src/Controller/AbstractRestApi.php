@@ -91,7 +91,7 @@ abstract class AbstractRestApi
      * Undocumented function
      *
      * @param string $key
-     * @param string|null $val
+     * @param string|null|array $val
      */
     public function response($key, $val = null)
     {

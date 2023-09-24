@@ -145,21 +145,7 @@ class Router
             $method = $action['method'];
             $params = $action['params'];
 
-            \Silnik\Logs\LogLoad::setInstance(
-                filename: PATH_LOG . '/loadpage.json',
-            namespace
-
-
-
-
-
-
-
-                : $action['namespace'],
-                method: $action['method'],
-                actionUri: $action['uri'],
-                methodHttp: $method
-            );
+            \Silnik\Logs\LogLoad::setInstance(filename: PATH_LOG . '/loadpage.json', namespace: $action['namespace'], method: $action['method'], actionUri: $action['uri'], methodHttp: $method);
             $controller = new $action['namespace'];
             if (Http::getInstance()->isOPTIONS()) {
                 header('HTTP/1.1 200 OK');
@@ -181,7 +167,7 @@ class Router
                             $paramsSender[$k] = $uri->nextSlice(ref: $k);
                         }
                     }
-                    if (!is_null(value: $idSender)) {
+                    if (!is_null($idSender)) {
                         if (!empty($paramsSender)) {
                             $controller->$method($idSender, $paramsSender);
                         } else {
@@ -222,6 +208,12 @@ class Router
         \Silnik\Logs\LogLoad::setInstance(
             filename: PATH_LOG . '/loadpage.json',
         namespace
+
+
+
+
+
+
 
 
 

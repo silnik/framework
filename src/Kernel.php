@@ -65,7 +65,7 @@ class Kernel
         );
         define(
             constant_name: 'PATH_TMP',
-            value: PATH_ROOT . getenv('PATH_TMP')
+            value: PATH_ROOT . getenv('PATH_TMP') . '/' . date('Y') . (date('z') + 1)
         );
         define(
             constant_name: 'PATH_LOG',

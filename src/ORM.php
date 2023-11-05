@@ -76,6 +76,7 @@ class ORM
                 } elseif (is_object($paramsArr[$nameParam])) {
                     switch (get_class($paramsArr[$nameParam])) {
                         case 'DateTime':
+                        case 'DateTimeImmutable':
                             $fullSql .= "'" . $paramsArr[$nameParam]->format('Y-m-d H:i:s') . "'";
 
                             break;

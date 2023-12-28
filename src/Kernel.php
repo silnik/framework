@@ -102,11 +102,7 @@ class Kernel
 
     private function sessions()
     {
-        return (
-            new Sessions(
-            path: PATH_SESSIONS
-            )
-        )->start();
+        Sessions::start();
     }
     private function logs(): ErrorPhp
     {

@@ -4,7 +4,7 @@ namespace Silnik\Logs;
 
 class LogLoad
 {
-    private $recordsDefault = 10;
+    private $recordsDefault = 20;
     public static $instance = null;
     public function __construct(
         private string $filename = '',
@@ -67,7 +67,7 @@ class LogLoad
             $records = $this->recordsDefault;
         }
         if (defined('MICROTIME') == true) {
-            $milliseconds = (float) number_format((microtime(true) - MICROTIME) * 1000, 5);
+            $milliseconds = round((microtime(true) - MICROTIME), 3);
             if ($records > 0) {
                 if (file_exists($this->filename)) {
                     $register = json_decode(file_get_contents($this->filename), true);

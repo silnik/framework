@@ -12,14 +12,16 @@ class Sessions
     private static $maxRequest = 10;
     public static function start()
     {
-        session_cache_limiter('private');
         session_cache_expire(self::$expiteFullSessDays * 24 * 60);
+        session_cache_limiter('private');
         session_save_path(PATH_SESSIONS);
         if (!empty(Http::getInstance()->header('Authorization')) && strlen(Http::getInstance()->header('Authorization')) > 32) {
             session_id(substr(strtolower(preg_replace('/[^a-zA-Z0-9]/', '', Http::getInstance()->header('Authorization'))), -32));
             session_start();
+            $_SESSION['ADDRESS_IP'] = $_SERVER['SERVER_ADDR'];
         }
         self::limitRequest();
+        self::clearEmptySessions();
         ob_start();
     }
     public static function limitRequest()
@@ -48,10 +50,8 @@ class Sessions
         if (!empty(PATH_SESSIONS) && is_dir(PATH_SESSIONS)) {
             if (opendir(PATH_SESSIONS)) {
                 foreach (glob(PATH_SESSIONS . '/sess_*') as $filename) {
-                    if (file_exists($filename) && filesize($filename) == 0) {
-                        if (filemtime($filename) + (self::$expiteEmptySessDays * 24 * 60) < time()) {
-                            unlink($filename);
-                        }
+                    if (is_file($filename) && (filemtime($filename) + (self::$expiteEmptySessDays * 24 * 60)) < time()) {
+                        unlink($filename);
                     }
                 }
             }

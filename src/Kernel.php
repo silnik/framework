@@ -84,7 +84,7 @@ class Kernel
             PATH_UPLOAD_PUBLIC,
             PATH_UPLOAD_PRIVARTE,
             PATH_SESSIONS,
-            PATH_TMP,
+            PATH_ROOT . getenv('PATH_TMP') . '/',
             PATH_LOG,
             PATH_CACHE,
         ];

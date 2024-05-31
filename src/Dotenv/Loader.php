@@ -30,7 +30,7 @@ class Loader
             'PATH_LOG' => '/.storage/log',
             'PATH_MIGRATIONS' => '/src/Migrations',
             'PATH_PROXIES' => '/.storage/DoctrineProxies',
-            'PATH_DATABASE' => '',
+            'PATH_DATABASE' => '/.storage/Database',
             'PATH_CACHE' => '/.storage/cache',
 
             'SESSION_LIFETIME' => 120,

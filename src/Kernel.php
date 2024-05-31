@@ -79,6 +79,10 @@ class Kernel
             constant_name: 'PATH_MIGRATIONS',
             value: PATH_ROOT . getenv('PATH_MIGRATIONS')
         );
+        define(
+            constant_name: 'PATH_DATABASE_BACKUP',
+            value: PATH_ROOT . getenv('PATH_DATABASE') . '/backups'
+        );
 
         $makeDirectoryENV = [
             PATH_UPLOAD_PUBLIC,
@@ -87,6 +91,7 @@ class Kernel
             PATH_ROOT . getenv('PATH_TMP') . '/',
             PATH_LOG,
             PATH_CACHE,
+            PATH_DATABASE_BACKUP,
         ];
 
         foreach ($makeDirectoryENV as $dir) {

@@ -45,6 +45,10 @@ class Http
     {
         return ($this->method === 'GET');
     }
+    public function isHEAD()
+    {
+        return ($this->method === 'HEAD');
+    }
     public function isPOST()
     {
         return ($this->method === 'POST');
@@ -64,6 +68,11 @@ class Http
     public function isOPTIONS()
     {
         return ($this->method === 'OPTIONS');
+    }
+
+    public function isBodyEmpty()
+    {
+        return empty($this->body);
     }
 
     public function setOption($method, $use)

@@ -206,26 +206,7 @@ class Router
         $action['params'] = '';
 
         \Silnik\Logs\LogLoad::setInstance(
-            filename: PATH_LOG . '/loadpage.json',
-        namespace
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            : $action['namespace'],
-            method: 'show',
-            actionUri: $action['actionUri'],
-            methodHttp: $requestMethod
+            filename: PATH_LOG . '/loadpage.json',namespace: $action['namespace'], method: 'show', actionUri: $action['actionUri'], methodHttp: $requestMethod
         );
 
         $controller = new $action['namespace'];

@@ -12,7 +12,7 @@ abstract class AbstractRestApi
      *   200 Ok
      *   201 Created
      *   204 No Content
-     * Client Erros
+     * Client Errors
      *   400 Bad Request
      *   401 Unauthorized
      *   403 Forbidden
@@ -111,7 +111,7 @@ abstract class AbstractRestApi
      * @param int $code
      * @return void
      */
-    public function status($code)
+    public function status($code): self
     {
         $this->code = $code;
 
@@ -124,7 +124,7 @@ abstract class AbstractRestApi
      * @param integer $v
      * @return void
      */
-    public function cacheExpiresMins($v = 1)
+    public function cacheExpiresMins($v = 1): self
     {
         $this->cacheExpiresMins = (getenv('APP_ENV') !== 'production' ? $v : 0);
 

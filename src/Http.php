@@ -72,7 +72,7 @@ class Http
 
     public function isBodyEmpty()
     {
-        return empty($this->body);
+        return empty($this->body) && (isset($_POST) && empty($_POST));
     }
 
     public function setOption($method, $use)

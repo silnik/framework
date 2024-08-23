@@ -8,7 +8,7 @@ class Sessions
 {
     private static $expiteFullSessDays = 5;
     private static $expiteEmptySessDays = 1;
-    private static $limitInSeconds = 10;
+    private static $limitInSeconds = 3;
     private static $maxRequest = 50;
     public static function start()
     {

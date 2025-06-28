@@ -161,11 +161,7 @@ class Router
                     $idSender = null;
                     $paramsSender = [];
                     foreach ($params as $k => $v) {
-                        if ($v == '{id}') {
-                            $idSender = (int) $uri->nextSlice(ref: $k);
-                        } else {
-                            $paramsSender[$k] = $uri->nextSlice(ref: $k);
-                        }
+                        $paramsSender[str_replace(['{', '}'], '', $v)] = $uri->nextSlice(ref: $k);
                     }
                     if (!is_null($idSender)) {
                         if (!empty($paramsSender)) {
@@ -206,7 +202,11 @@ class Router
         $action['params'] = '';
 
         \Silnik\Logs\LogLoad::setInstance(
-            filename: PATH_LOG . '/loadpage.json',namespace: $action['namespace'], method: 'show', actionUri: $action['actionUri'], methodHttp: $requestMethod
+            filename: PATH_LOG . '/loadpage.json',
+            namespace: $action['namespace'],
+            method: 'show',
+            actionUri: $action['actionUri'],
+            methodHttp: $requestMethod
         );
 
         $controller = new $action['namespace'];

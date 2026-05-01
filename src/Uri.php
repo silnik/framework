@@ -40,7 +40,7 @@ class Uri
 
     private function forceLocations()
     {
-        if (!empty(getenv('REQUEST_SCHEME')) && getenv('REQUEST_SCHEME') == 'http' && $this->https == true) {
+        if (!empty(getenv('REQUEST_SCHEME')) && (getenv('HTTP_X_FORWARDED_PROTO') == 'http' && getenv('REQUEST_SCHEME') == 'http') && $this->https == true) {
             header(header: 'Location: ' . ($this->https == true ? 'https://' : 'http://') . $this->hostname . getenv('REQUEST_URI'));
             exit;
         }
